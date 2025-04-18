@@ -56,7 +56,7 @@ return {
   ),
   s(
     { trig = "lim", snippetType = "autosnippet", desc = "Limit", condition = InMathzone },
-    fmta("\\lim_{<> \to <>}", { i(1), i(2) })
+    fmta("\\lim_{<> \\to <>}", { i(1), i(2) })
   ),
   s(
     { trig = "din", snippetType = "autosnippet", desc = "Definite Integral", condition = InMathzone },
