@@ -27,12 +27,9 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.dap.core" },
     { import = "lazyvim.plugins.extras.test.core" },
     { import = "lazyvim.plugins.extras.util.project" },
-    { import = "lazyvim.plugins.extras.lang.rust" },
     { import = "lazyvim.plugins.extras.lang.markdown" },
     { import = "lazyvim.plugins.extras.lang.tex" },
-    { import = "lazyvim.plugins.extras.lang.java" },
-    { import = "lazyvim.plugins.extras.lang.kotlin" },
-    { import = "lazyvim.plugins.extras.lang.python" },
+    { import = "lazyvim.plugins.extras.coding.nvim-cmp" },
     -- import/override with your plugins
     { import = "plugins" },
   },
