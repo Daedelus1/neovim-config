@@ -49,27 +49,28 @@ local generate_hom_matrix = function(args, snip)
 end
 
 return {
+
   -- Common Operations
   s(
-    { trig = "ff", snippetType = "autosnippet", desc = "Fraction", condition = InMathzone },
+    { trig = ".ff", snippetType = "autosnippet", desc = "Fraction", condition = InMathzone },
     fmta("\\frac{<>}{<>}", { i(1), i(2) })
   ),
   s(
-    { trig = "lim", snippetType = "autosnippet", desc = "Limit", condition = InMathzone },
+    { trig = ".lim", snippetType = "autosnippet", desc = "Limit", condition = InMathzone },
     fmta("\\lim_{<> \\to <>}", { i(1), i(2) })
   ),
   s(
-    { trig = "din", snippetType = "autosnippet", desc = "Definite Integral", condition = InMathzone },
+    { trig = ".din", snippetType = "autosnippet", desc = "Definite Integral", condition = InMathzone },
     fmta("\\int_{<>}^{<>}", { i(1), i(2) })
   ),
   s(
-    { trig = "ind", snippetType = "autosnippet", desc = "Indefinite Integral", condition = InMathzone },
+    { trig = ".ind", snippetType = "autosnippet", desc = "Indefinite Integral", condition = InMathzone },
     fmta("\\int ", {})
   ),
 
   -- Matrix-like environments
 
-  s({ trig = "([bBpvV])(%d+)x(%d+)", name = "New matrix", snippetType = "autosnippet", regTrig = true }, {
+  s({ trig = ".([bBpvV])(%d+)x(%d+)%s", name = "New matrix", snippetType = "autosnippet", regTrig = true }, {
     t("\\begin{"),
     f(function(_, snip)
       return snip.captures[1] .. "matrix"
@@ -85,19 +86,23 @@ return {
     t("}"),
   }, { condition = InMathzone }),
 
-  s({ trig = "([bBpvV])(%d+)h(%d+)", name = "New homogeneous matrix", snippetType = "autosnippet", regTrig = true }, {
-    t("\\begin{"),
-    f(function(_, snip)
-      return snip.captures[1] .. "matrix"
-    end),
-    t("}"),
-    t({ "", "" }),
-    d(1, generate_hom_matrix),
-    t({ "", "" }),
-    t("\\end{"),
-    f(function(_, snip)
-      return snip.captures[1] .. "matrix"
-    end),
-    t("}"),
-  }, { condition = InMathzone }),
+  s(
+    { trig = ".([bBpvV])(%d+)h(%d+)%s", name = "New homogeneous matrix", snippetType = "autosnippet", regTrig = true },
+    {
+      t("\\begin{"),
+      f(function(_, snip)
+        return snip.captures[1] .. "matrix"
+      end),
+      t("}"),
+      t({ "", "" }),
+      d(1, generate_hom_matrix),
+      t({ "", "" }),
+      t("\\end{"),
+      f(function(_, snip)
+        return snip.captures[1] .. "matrix"
+      end),
+      t("}"),
+    },
+    { condition = InMathzone }
+  ),
 }
