@@ -7,7 +7,6 @@ return {
         "lua_ls",
         "rust_analyzer",
         "harper_ls",
-        "pyright",
         "clangd",
       },
     },
