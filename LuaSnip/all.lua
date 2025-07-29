@@ -17,8 +17,26 @@ return {
   s(
     { trig = ";aut", snippetType = "autosnippet", desc = "Toggle Autocomplete" },
     f(function()
-      vim.b.cmp_enabled = not vim.b.cmp_enabled
-      require("cmp").setup.buffer({ enabled = vim.b.cmp_enabled })
+      if vim.b.cmp_enabled then
+        vim.b.cmp_enabled = false
+        vim.print("Suggestions Disabled - Manual")
+      else
+        vim.b.cmp_enabled = true
+        vim.print("Suggestions Enabled - Manual")
+      end
+      RefreshCmpState()
+    end)
+  ),
+  -- Toggle Automatic Suggestion Management
+  s(
+    { trig = ";asm", snippetType = "autosnippet", desc = "Toggle Automatic Suggestion Management" },
+    f(function()
+      vim.g.automatic_suggestion_management_enabled = not vim.g.automatic_suggestion_management_enabled
+      if vim.g.automatic_suggestion_management_enabled then
+        vim.print("Automatic Suggestion Management Enabled")
+      else
+        vim.print("Automatic Suggestion Management Disabled")
+      end
     end)
   ),
 }

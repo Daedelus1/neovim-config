@@ -141,7 +141,7 @@ return {
       return snip.captures[1]
     end), t("°F") }
   ),
-  -- Degrees Celcius
+  -- Degrees Celsius
   s(
     { trig = "([^%s]*)(%s*),dc", regTrig = true, snippetType = "autosnippet" },
     { f(function(_, snip)

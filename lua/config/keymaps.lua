@@ -16,3 +16,16 @@ vim.api.nvim_set_keymap(
 
 -- Toggle compiler results
 vim.api.nvim_set_keymap("n", "<F9>", "<cmd>CompilerToggleResults<cr>", { noremap = true, silent = true })
+
+-- LuaSnip Keymaps
+local ls = require("luasnip")
+
+vim.keymap.set({ "i" }, "<Tab>", function()
+  ls.expand()
+end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<Tab>", function()
+  ls.jump(1)
+end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
+  ls.jump(-1)
+end, { silent = true })
