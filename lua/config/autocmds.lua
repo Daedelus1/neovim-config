@@ -19,7 +19,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Automatic Suggestion Management evaluated
 local last_state = true
 -- Fires on cursor movement and buffer changes in `.tex` files
 vim.api.nvim_create_autocmd({ "CursorMovedI", "CursorMoved", "TextChanged", "TextChangedI" }, {
@@ -47,5 +46,22 @@ vim.api.nvim_create_autocmd({ "CursorMovedI", "CursorMoved", "TextChanged", "Tex
       vim.print("Suggestions Enabled - Automatic")
     end
     RefreshCmpState()
+  end,
+})
+
+-- Set filetype to 'tex' for.Rnw files to enable VimTeX features
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.rnw",
+  callback = function()
+    vim.bo.filetype = "rnw"
+  end,
+  desc = "Set filetype to tex for.Rnw files",
+})
+
+-- Knits .rnw file on save
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+  pattern = "*.rnw",
+  callback = function()
+    os.execute("Rscript -e \"library(knitr); knit('" .. vim.fn.expand("%") .. "')\"")
   end,
 })
