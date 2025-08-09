@@ -10,32 +10,32 @@ local get_visual = function(args, parent)
 end
 -- Example: expanding a snippet on a new line only.
 -- In a snippet file, first require the line_begin condition...
-local line_begin = require("luasnip.extras.expand_conditions").line_begin
+local line_begin = require('luasnip.extras.expand_conditions').line_begin
 
 return {
   -- Toggle Autocomplete
   s(
-    { trig = ";aut", snippetType = "autosnippet", desc = "Toggle Autocomplete" },
+    { trig = ';aut', snippetType = 'autosnippet', desc = 'Toggle Autocomplete' },
     f(function()
       if vim.b.cmp_enabled then
         vim.b.cmp_enabled = false
-        vim.print("Suggestions Disabled - Manual")
+        vim.print 'Suggestions Disabled - Manual'
       else
         vim.b.cmp_enabled = true
-        vim.print("Suggestions Enabled - Manual")
+        vim.print 'Suggestions Enabled - Manual'
       end
       RefreshCmpState()
     end)
   ),
   -- Toggle Automatic Suggestion Management
   s(
-    { trig = ";asm", snippetType = "autosnippet", desc = "Toggle Automatic Suggestion Management" },
+    { trig = ';asm', snippetType = 'autosnippet', desc = 'Toggle Automatic Suggestion Management' },
     f(function()
       vim.g.automatic_suggestion_management_enabled = not vim.g.automatic_suggestion_management_enabled
       if vim.g.automatic_suggestion_management_enabled then
-        vim.print("Automatic Suggestion Management Enabled")
+        vim.print 'Automatic Suggestion Management Enabled'
       else
-        vim.print("Automatic Suggestion Management Disabled")
+        vim.print 'Automatic Suggestion Management Disabled'
       end
     end)
   ),

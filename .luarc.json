@@ -1,13 +1,9 @@
 {
     "diagnostics.globals": [
         "s",
+        "f",
         "t",
         "fmta",
-        "i",
-        "rep",
-        "f",
-        "sn",
-        "d",
-        "r"
+        "i"
     ]
 }
