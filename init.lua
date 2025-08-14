@@ -74,6 +74,31 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Window Leader Remap from <C-w> to <leader>w
+vim.keymap.set('n', '<leader>wd', '<C-w>d', { desc = 'Show diagnostics under the cursor' })
+vim.keymap.set('n', '<leader>wh', '<C-w>h', { desc = 'Go to the left window' })
+vim.keymap.set('n', '<leader>wH', '<C-w>H', { desc = 'Move window to far left' })
+vim.keymap.set('n', '<leader>wj', '<C-w>j', { desc = 'Go to the down window' })
+vim.keymap.set('n', '<leader>wJ', '<C-w>J', { desc = 'Move window to far bottom' })
+vim.keymap.set('n', '<leader>wk', '<C-w>k', { desc = 'Go to the up window' })
+vim.keymap.set('n', '<leader>wK', '<C-w>K', { desc = 'Move window to far top' })
+vim.keymap.set('n', '<leader>wl', '<C-w>l', { desc = 'Go to the right window' })
+vim.keymap.set('n', '<leader>wL', '<C-w>L', { desc = 'Move window to far right' })
+vim.keymap.set('n', '<leader>wo', '<C-w>o', { desc = 'Close all other windows' })
+vim.keymap.set('n', '<leader>wp', '<C-w>p', { desc = 'Quit a window' })
+vim.keymap.set('n', '<leader>ws', '<C-w>s', { desc = 'Split window' })
+vim.keymap.set('n', '<leader>wT', '<C-w>T', { desc = 'Break out into a new tab' })
+vim.keymap.set('n', '<leader>wv', '<C-w>v', { desc = 'Split window vertically' })
+vim.keymap.set('n', '<leader>ww', '<C-w>w', { desc = 'Switch windows' })
+vim.keymap.set('n', '<leader>wx', '<C-w>x', { desc = 'Swap current with next' })
+vim.keymap.set('n', '<leader>w+', '<C-w>+', { desc = 'Increase height' })
+vim.keymap.set('n', '<leader>w-', '<C-w>-', { desc = 'Decrease height' })
+vim.keymap.set('n', '<leader>w<', '<C-w><', { desc = 'Decrease width' })
+vim.keymap.set('n', '<leader>w=', '<C-w>=', { desc = 'Equally high and wide' })
+vim.keymap.set('n', '<leader>w>', '<C-w>>', { desc = 'Increase width' })
+vim.keymap.set('n', '<leader>w_', '<C-w>_', { desc = 'Max out the height' })
+vim.keymap.set('n', '<leader>w|', '<C-w>|', { desc = 'Max out the width' })
+vim.keymap.set('n', '<leader>wD', '<C-w>D', { desc = 'Show diagnostics under the cursor' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -238,9 +263,12 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
+        { '<leader>c', group = '[C]onfiguration' },
+        { '<leader>l', group = 'V[l]mTeX' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>w', group = '[W]indow' },
       },
     },
   },
@@ -858,6 +886,7 @@ require('lazy').setup({
       auto_install = true,
       highlight = {
         enable = true,
+        disable = { 'latex' },
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
@@ -915,10 +944,10 @@ require('lazy').setup({
     'lervag/vimtex',
     lazy = false,
     config = function()
-      vim.g.vimtex_view_method = 'general'
-      vim.g.vimtex_general_viewer = 'okular'
+      vim.g.vimtex_view_method = 'general' -- or 'sumatrapdf'
+      vim.g.vimtex_view_general_viewer = 'SumatraPDF'
+      vim.g.vimtex_view_general_options = '-reuse-instance -bg-color 0xffffff -presentation -forward-search @tex @line @pdf'
       vim.g.vimtex_compiler_progname = 'nvr'
-      vim.g.vimtex_quickfix_method = 'latexlog'
       vim.g.vimtex_compiler_latexmk = {
         options = {
           '-pdf',
@@ -929,10 +958,24 @@ require('lazy').setup({
         aux_dir = './.latexmk/aux',
         out_dir = './.latexmk/out',
       }
+      vim.g.vimtex_syntax_conceal = {
+        accents = 1,
+        ligatures = 1,
+        fancy = 1,
+        spacing = 1,
+        greek = 1,
+        math_bounds = 1,
+        math_delimiters = 1,
+        math_fracs = 1,
+        math_super_sub = 1,
+        math_symbols = 1,
+        sections = 0,
+        styles = 1,
+      }
+
+      vim.opt.conceallevel = 2
+      vim.opt.concealcursor = 'nv'
     end,
-    keys = {
-      { '<localLeader>l', '', desc = '+vimtex' },
-    },
     ft = { 'tex', 'latex', 'rnw' },
   },
   {
@@ -969,6 +1012,20 @@ require('lazy').setup({
       },
     },
   },
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    vscode = true,
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
+  },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -989,6 +1046,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
+  { import = 'custom' },
   { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`

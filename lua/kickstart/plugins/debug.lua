@@ -27,28 +27,28 @@ return {
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
     {
-      '<F5>',
+      '<F10>',
       function()
         require('dap').continue()
       end,
       desc = 'Debug: Start/Continue',
     },
     {
-      '<F1>',
+      '<F9>',
       function()
         require('dap').step_into()
       end,
       desc = 'Debug: Step Into',
     },
     {
-      '<F2>',
+      '<F7>',
       function()
         require('dap').step_over()
       end,
       desc = 'Debug: Step Over',
     },
     {
-      '<F3>',
+      '<F8>',
       function()
         require('dap').step_out()
       end,
@@ -70,7 +70,7 @@ return {
     },
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     {
-      '<F7>',
+      '<leader>d',
       function()
         require('dapui').toggle()
       end,
@@ -107,30 +107,30 @@ return {
       icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
       controls = {
         icons = {
-          pause = '⏸',
+          pause = '',
           play = '▶',
           step_into = '⏎',
-          step_over = '⏭',
-          step_out = '⏮',
+          step_over = '󰒭',
+          step_out = '󰒮',
           step_back = 'b',
           run_last = '▶▶',
-          terminate = '⏹',
-          disconnect = '⏏',
+          terminate = '󰓛',
+          disconnect = '󰇪',
         },
       },
     }
 
     -- Change breakpoint icons
-    -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
-    -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
-    -- local breakpoint_icons = vim.g.have_nerd_font
-    --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
-    --   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
-    -- for type, icon in pairs(breakpoint_icons) do
-    --   local tp = 'Dap' .. type
-    --   local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
-    --   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
-    -- end
+    vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
+    vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
+    local breakpoint_icons = vim.g.have_nerd_font
+        and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
+      or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
+    for type, icon in pairs(breakpoint_icons) do
+      local tp = 'Dap' .. type
+      local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
+      vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
+    end
 
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
@@ -144,5 +144,54 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
+    dap.adapters.cppdbg = {
+      id = 'cppdbg',
+      type = 'executable',
+      command = 'C:\\Users\\Ethan\\.vscode\\extensions\\ms-vscode.cpptools-1.26.3-win32-x64\\debugAdapters\\bin\\OpenDebugAD7.exe',
+      options = {
+        detached = false,
+      },
+    }
+    dap.configurations.cpp = {
+      {
+        name = 'Launch file',
+        type = 'cppdbg',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopAtEntry = true,
+        setupCommands = {
+          {
+            text = '-enable-pretty-printing',
+            description = 'enable pretty printing',
+            ignoreFailures = false,
+          },
+        },
+      },
+      {
+        name = 'Attach to gdbserver :1234',
+        type = 'cppdbg',
+        request = 'launch',
+        MIMode = 'gdb',
+        miDebuggerServerAddress = 'localhost:1234',
+        miDebuggerPath = '"C:\\msys64\\mingw64\\bin\\gdb.exe"',
+        cwd = '${workspaceFolder}',
+        program = function()
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        setupCommands = {
+          {
+            text = '-enable-pretty-printing',
+            description = 'enable pretty printing',
+            ignoreFailures = false,
+          },
+        },
+      },
+    }
+
+    dap.configurations.c = dap.configurations.cpp
+    dap.configurations.rust = dap.configurations.cpp
   end,
 }
