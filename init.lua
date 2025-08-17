@@ -1,9 +1,10 @@
 vim.g.mapleader = ' ' -- Set <space> as the leader key
 vim.g.maplocalleader = ' '
 
-vim.g.have_nerd_font = true -- Allows dependancies to use a nerd font
+vim.g.have_nerd_font = true -- Allows dependencies to use a nerd font
 
 vim.o.relativenumber = true -- Relative Line Numbers
+vim.o.number = true
 
 vim.o.mouse = 'a' -- Enable mouse mode, can be useful for resizing splits for example!
 
@@ -40,9 +41,13 @@ vim.o.cursorline = true -- Show which line your cursor is on
 
 vim.o.scrolloff = 10 -- Minimal number of screen lines to keep above and below the cursor.
 
--- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
+-- If performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 vim.o.confirm = true
+
+vim.o.tabstop = 4
+
+vim.o.shiftwidth = 4
 
 -- [[ Basic Keymaps ]]
 
@@ -136,8 +141,6 @@ local nvimbattery = {
   end,
 }
 
-vim.g.automatic_suggestion_management_enabled = true
-
 -- Evaluates whether or not suggestions should be enabled or not, and sets it accordingly
 function RefreshCmpState()
   local disabled = false
@@ -166,7 +169,8 @@ end
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+
+  -- 'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -263,12 +267,13 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
-        { '<leader>c', group = '[C]onfiguration' },
+        { '<leader>c', group = '[C]ode' },
         { '<leader>l', group = 'V[l]mTeX' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>w', group = '[W]indow' },
+        { '<leader>n', group = '[N]otification' },
       },
     },
   },
@@ -378,9 +383,9 @@ require('lazy').setup({
       end, { desc = '[S]earch [/] in Open Files' })
 
       -- Shortcut for searching your Neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function()
+      vim.keymap.set('n', '<leader>sc', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[S]earch [N]eovim files' })
+      end, { desc = '[S]earch Neovim [C]onfig' })
     end,
   },
 
@@ -413,7 +418,7 @@ require('lazy').setup({
         config = function()
           vim.keymap.set('n', '<leader>cm', function()
             vim.cmd 'Mason'
-          end)
+          end, { desc = '[M]ason' })
         end,
       },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
@@ -469,27 +474,27 @@ require('lazy').setup({
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
-          map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
+          map('<leader>cn', vim.lsp.buf.rename, '[R]e[n]ame')
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
+          map('<leader>ca', vim.lsp.buf.code_action, 'Goto Code [A]ction', { 'n', 'x' })
 
           -- Find references for the word under your cursor.
-          map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('<leader>cR', require('telescope.builtin').lsp_references, 'Goto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gri', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          map('<leader>ci', require('telescope.builtin').lsp_implementations, 'Goto [I]mplementation')
 
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
-          map('grd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          map('<leader>cd', require('telescope.builtin').lsp_definitions, 'Goto [D]efinition')
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
-          map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+          map('<leader>cD', vim.lsp.buf.declaration, 'Goto [D]eclaration')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
@@ -502,7 +507,7 @@ require('lazy').setup({
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
+          map('<leader>cT', require('telescope.builtin').lsp_type_definitions, 'Goto [T]ype Definition')
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client
@@ -691,7 +696,8 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        -- Set the language to 'true' to disable it
+        local disable_filetypes = { c = false, cpp = false }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -703,6 +709,8 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        cpp = { 'clang-format' },
+        c = { 'clang-format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -825,7 +833,7 @@ require('lazy').setup({
       -- the rust implementation via `'prefer_rust_with_warning'`
       --
       -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = 'lua' },
+      fuzzy = { implementation = 'prefer_rust_with_warning' },
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
@@ -881,7 +889,22 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'cpp',
+        'cmake',
+        'make',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -931,6 +954,33 @@ require('lazy').setup({
       --   `nvim-notify` is only needed, if you want to use the notification view.
       --   If not available, we use `mini` as the fallback
       { 'rcarriga/nvim-notify', opts = { timeout_ms = 3500 } },
+    },
+    keys = {
+
+      {
+        'n',
+        '<leader>nl',
+        function()
+          require('noice').cmd 'last'
+        end,
+        desc = 'Show Last Notification',
+      },
+      {
+        'n',
+        '<leader>nh',
+        function()
+          require('noice').cmd 'history'
+        end,
+        desc = 'Show Notification History',
+      },
+      {
+        'n',
+        '<leader>sn',
+        function()
+          require('noice').cmd 'history'
+        end,
+        desc = 'Search [N]otification History',
+      },
     },
   },
   {
@@ -1025,6 +1075,59 @@ require('lazy').setup({
       { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
       { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
     },
+    {
+      'mrcjkb/rustaceanvim',
+      version = '^6', -- Recommended
+      lazy = false, -- This plugin is already lazy
+    },
+  },
+  {
+    'Civitasv/cmake-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('cmake-tools').setup {
+        cmake_command = 'cmake',
+        cmake_build_directory = 'build',
+      }
+    end,
+  },
+  {
+    'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v3.x',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      'nvim-tree/nvim-web-devicons', -- optional, but recommended
+    },
+    keys = {
+      {
+        '<leader>st',
+        mode = { 'n', 'x', 'o' },
+        function()
+          local reveal_file = vim.fn.expand '%:p'
+          if reveal_file == '' then
+            reveal_file = vim.fn.getcwd()
+          else
+            local f = io.open(reveal_file, 'r')
+            if f then
+              f.close(f)
+            else
+              reveal_file = vim.fn.getcwd()
+            end
+          end
+          require('neo-tree.command').execute {
+            action = 'focus', -- OPTIONAL, this is the default value
+            source = 'filesystem', -- OPTIONAL, this is the default value
+            position = 'left', -- OPTIONAL, this is the default value
+            reveal_file = reveal_file, -- path to file or folder to reveal
+            reveal_force_cwd = true, -- change cwd without asking if needed
+            toggle = true,
+          }
+        end,
+        desc = 'Neo[T]ree',
+      },
+    },
+    lazy = false, -- neo-tree will lazily load itself
   },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -1039,7 +1142,6 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -1074,6 +1176,49 @@ require('lazy').setup({
     },
   },
 })
+
+function BuildCode()
+  vim.print 'Code Building has not been configured for this file type.'
+end
+function CleanCode()
+  vim.print 'Code Cleaning has not been configured for this file type.'
+end
+function RunCode()
+  vim.print 'Code Running has not been configured for this file type.'
+end
+function TestCode()
+  vim.print 'Code Running has not been configured for this file type.'
+end
+
+vim.keymap.set('n', '<leader>cr', function()
+  RunCode()
+end, { desc = '[R]un Code' })
+vim.keymap.set('n', '<leader>cb', function()
+  BuildCode()
+end, { desc = '[B]uild Code' })
+vim.keymap.set('n', '<leader>cc', function()
+  CleanCode()
+end, { desc = '[C]lean Code' })
+vim.keymap.set('n', '<leader>ct', function()
+  TestCode()
+end, { desc = '[T]est Code' })
+
+vim.diagnostic.config {
+  virtual_text = {
+    filter = function(diagnostic)
+      return not string.match(diagnostic.message, 'code is inactive due to')
+    end,
+  },
+}
+vim.keymap.set('n', '<leader>sn', function()
+  vim.cmd 'Noice telescope'
+end, { desc = '[S]earch [N]otifications' })
+vim.keymap.set('n', '<leader>nl', function()
+  vim.cmd 'Noice last'
+end, { desc = 'Show [L]ast Notification' })
+vim.keymap.set('n', '<leader>nh', function()
+  vim.cmd 'Noice history'
+end, { desc = 'Show Notification [H]istory' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

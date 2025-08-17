@@ -25,25 +25,8 @@ tex_utils.in_tikz = function() -- TikZ picture environment detection
 end
 
 local line_begin = require('luasnip.extras.expand_conditions').line_begin
-
 return {
   -- text fractions
-  -- s({ trig = ",12", snippetType = "autosnippet" }, { t("½") }),
-  -- s({ trig = ",13", snippetType = "autosnippet" }, { t("⅓") }),
-  -- s({ trig = ",23", snippetType = "autosnippet" }, { t("⅔") }),
-  -- s({ trig = ",14", snippetType = "autosnippet" }, { t("¼") }),
-  -- s({ trig = ",34", snippetType = "autosnippet" }, { t("¾") }),
-  -- s({ trig = ",15", snippetType = "autosnippet" }, { t("⅕") }),
-  -- s({ trig = ",25", snippetType = "autosnippet" }, { t("⅖") }),
-  -- s({ trig = ",35", snippetType = "autosnippet" }, { t("⅗") }),
-  -- s({ trig = ",45", snippetType = "autosnippet" }, { t("⅘") }),
-  -- s({ trig = ",16", snippetType = "autosnippet" }, { t("⅙") }),
-  -- s({ trig = ",56", snippetType = "autosnippet" }, { t("⅚") }),
-  -- s({ trig = ",18", snippetType = "autosnippet" }, { t("⅛") }),
-  -- s({ trig = ",38", snippetType = "autosnippet" }, { t("⅜") }),
-  -- s({ trig = ",58", snippetType = "autosnippet" }, { t("⅝") }),
-  -- s({ trig = ",78", snippetType = "autosnippet" }, { t("⅞") }),
-
   s({ trig = '(.*),12', regTrig = true, snippetType = 'autosnippet' }, { f(function(_, snip)
     return snip.captures[1]
   end), t '½' }),

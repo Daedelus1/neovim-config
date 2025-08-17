@@ -19,24 +19,12 @@ return {
     f(function()
       if vim.b.cmp_enabled then
         vim.b.cmp_enabled = false
-        vim.print 'Suggestions Disabled - Manual'
+        vim.print 'Suggestions Disabled'
       else
         vim.b.cmp_enabled = true
-        vim.print 'Suggestions Enabled - Manual'
+        vim.print 'Suggestions Enabled'
       end
       RefreshCmpState()
-    end)
-  ),
-  -- Toggle Automatic Suggestion Management
-  s(
-    { trig = ';asm', snippetType = 'autosnippet', desc = 'Toggle Automatic Suggestion Management' },
-    f(function()
-      vim.g.automatic_suggestion_management_enabled = not vim.g.automatic_suggestion_management_enabled
-      if vim.g.automatic_suggestion_management_enabled then
-        vim.print 'Automatic Suggestion Management Enabled'
-      else
-        vim.print 'Automatic Suggestion Management Disabled'
-      end
     end)
   ),
 }
