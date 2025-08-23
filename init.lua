@@ -792,7 +792,7 @@ require('lazy').setup({
         preset = 'enter',
 
         vim.keymap.set({ 'i' }, '<Tab>', function()
-          require('luasnip').expand()
+          require('luasnip').expand {}
         end, { silent = true }),
         vim.keymap.set({ 'i', 's' }, '<Tab>', function()
           require('luasnip').jump(1)
