@@ -955,33 +955,6 @@ require('lazy').setup({
       --   If not available, we use `mini` as the fallback
       { 'rcarriga/nvim-notify', opts = { timeout_ms = 3500 } },
     },
-    keys = {
-
-      {
-        'n',
-        '<leader>nl',
-        function()
-          require('noice').cmd 'last'
-        end,
-        desc = 'Show Last Notification',
-      },
-      {
-        'n',
-        '<leader>nh',
-        function()
-          require('noice').cmd 'history'
-        end,
-        desc = 'Show Notification History',
-      },
-      {
-        'n',
-        '<leader>sn',
-        function()
-          require('noice').cmd 'history'
-        end,
-        desc = 'Search [N]otification History',
-      },
-    },
   },
   {
     'goolord/alpha-nvim',
