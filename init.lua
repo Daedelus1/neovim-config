@@ -622,7 +622,6 @@ require('lazy').setup({
         --
         texlab = {},
         clangd = {},
-        cpplint = {},
 
         lua_ls = {
           -- cmd = { ... },
