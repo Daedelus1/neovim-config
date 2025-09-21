@@ -6,7 +6,7 @@ vim.g.have_nerd_font = true -- Allows dependencies to use a nerd font
 vim.o.relativenumber = true -- Relative Line Numbers
 vim.o.number = true
 
-vim.o.mouse = 'a' -- Enable mouse mode, can be useful for resizing splits for example!
+vim.o.mouse = '' -- Enable mouse mode, can be useful for resizing splits for example!
 
 vim.o.showmode = false -- Don't show the mode, since it's already in the status line
 
@@ -104,6 +104,16 @@ vim.keymap.set('n', '<leader>w>', '<C-w>>', { desc = 'Increase width' })
 vim.keymap.set('n', '<leader>w_', '<C-w>_', { desc = 'Max out the height' })
 vim.keymap.set('n', '<leader>w|', '<C-w>|', { desc = 'Max out the width' })
 vim.keymap.set('n', '<leader>wD', '<C-w>D', { desc = 'Show diagnostics under the cursor' })
+
+vim.keymap.set('n', '<leader>tm', function()
+  if vim.o.mouse == 'a' then
+    vim.o.mouse = ''
+    print 'Mouse: Disabled'
+  else
+    vim.o.mouse = 'a'
+    print 'Mouse: Enabled'
+  end
+end)
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -1019,6 +1029,8 @@ require('lazy').setup({
         'justinhj/battery.nvim',
         opts = {
           show_status_when_no_battery = false,
+          show_plugged_icon = false, -- If true show a cable icon alongside the battery icon when plugged in
+          show_unplugged_icon = false,
         },
       },
     },
