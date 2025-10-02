@@ -1444,6 +1444,17 @@ local toggle_mouse = function()
   end
 end
 
+local cycle_tabwidth = function()
+  if vim.o.tabstop == 4 then
+    vim.o.tabstop = 2
+    vim.o.shiftwidth = 2
+  elseif vim.o.tabstop == 2 then
+    vim.o.tabstop = 4
+    vim.o.shiftwidth = 4
+  end
+  require('fidget').notify(string.format('Tabwith set to %d', vim.o.tabstop))
+end
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -1489,6 +1500,7 @@ vim.keymap.set('n', '<leader>w|', '<C-w>|', { desc = 'Max out the width' })
 vim.keymap.set('n', '<leader>wD', '<C-w>D', { desc = 'Show diagnostics under the cursor' })
 
 vim.keymap.set('n', '<leader>tm', toggle_mouse, { desc = 'Toggle [M]ouse' })
+vim.keymap.set('n', '<leader>tt', cycle_tabwidth, { desc = 'Toggle [T]abwidth' })
 
 vim.keymap.set('n', '<leader>cr', vim.g.run_code, { desc = '[R]un Code' })
 vim.keymap.set('n', '<leader>cb', vim.g.build_code, { desc = '[B]uild Code' })
