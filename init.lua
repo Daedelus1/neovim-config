@@ -1518,5 +1518,148 @@ vim.keymap.set('n', '<leader>nh', function()
   vim.cmd 'Noice history'
 end, { desc = 'Show Notification [H]istory' })
 
+-- [[ Snippets ]]
+local luasnip = require 'luasnip'
+local s = luasnip.snippet
+local sn = luasnip.snippet_node
+local t = luasnip.text_node
+local i = luasnip.insert_node
+local f = luasnip.function_node
+local d = luasnip.dynamic_node
+local fmt = require('luasnip.extras.fmt').fmt
+local fmta = require('luasnip.extras.fmt').fmta
+local rep = require('luasnip.extras').rep
+
+local return_capture = function(_, snip, captureIndex)
+  return snip.captures[captureIndex]
+end
+
+local return_first_capture = function(_, snip)
+  return return_capture(_, snip, 1)
+end
+
+-- Summary: When `LS_SELECT_RAW` is populated with a visual selection, the function
+-- returns an insert node whose initial text is set to the visual selection.
+-- When `LS_SELECT_RAW` is empty, the function simply returns an empty insert node.
+local get_visual = function(args, parent)
+  if #parent.snippet.env.LS_SELECT_RAW > 0 then
+    return sn(nil, i(1, parent.snippet.env.LS_SELECT_RAW))
+  else -- If LS_SELECT_RAW is empty, return a blank insert node
+    return sn(nil, i(1))
+  end
+end
+-- Example: expanding a snippet on a new line only.
+-- In a snippet file, first require the line_begin condition...
+local line_begin = require('luasnip.extras.expand_conditions').line_begin
+
+-- Greek Letters
+local greek_letter_snippets = {
+  s({ trig = ',al', snippetType = 'autosnippet' }, { t '\\alpha' }),
+  s({ trig = ',be', snippetType = 'autosnippet' }, { t '\\beta' }),
+  s({ trig = ',ga', snippetType = 'autosnippet' }, { t '\\gamma' }),
+  s({ trig = ',de', snippetType = 'autosnippet' }, { t '\\delta' }),
+  s({ trig = ',ep', snippetType = 'autosnippet' }, { t '\\varepsilon' }),
+  s({ trig = ',ze', snippetType = 'autosnippet' }, { t '\\zeta' }),
+  s({ trig = ',et', snippetType = 'autosnippet' }, { t '\\eta' }),
+  s({ trig = ',th', snippetType = 'autosnippet' }, { t '\\theta' }),
+  s({ trig = ',io', snippetType = 'autosnippet' }, { t '\\iota' }),
+  s({ trig = ',ka', snippetType = 'autosnippet' }, { t '\\kappa' }),
+  s({ trig = ',la', snippetType = 'autosnippet' }, { t '\\lambda' }),
+  s({ trig = ',mu', snippetType = 'autosnippet' }, { t '\\mu' }),
+  s({ trig = ',nu', snippetType = 'autosnippet' }, { t '\\nu' }),
+  s({ trig = ',xi', snippetType = 'autosnippet' }, { t '\\xi' }),
+  s({ trig = ',pi', snippetType = 'autosnippet' }, { t '\\pi' }),
+  s({ trig = ',rh', snippetType = 'autosnippet' }, { t '\\rho' }),
+  s({ trig = ',si', snippetType = 'autosnippet' }, { t '\\sigma' }),
+  s({ trig = ',ta', snippetType = 'autosnippet' }, { t '\\tau' }),
+  s({ trig = ',up', snippetType = 'autosnippet' }, { t '\\upsilon' }),
+  s({ trig = ',ph', snippetType = 'autosnippet' }, { t '\\phi' }),
+  s({ trig = ',ch', snippetType = 'autosnippet' }, { t '\\chi' }),
+  s({ trig = ',ps', snippetType = 'autosnippet' }, { t '\\psi' }),
+  s({ trig = ',om', snippetType = 'autosnippet' }, { t '\\omega' }),
+  s({ trig = ',Ga', snippetType = 'autosnippet' }, { t '\\Gamma' }),
+  s({ trig = ',De', snippetType = 'autosnippet' }, { t '\\Delta' }),
+  s({ trig = ',Th', snippetType = 'autosnippet' }, { t '\\Theta' }),
+  s({ trig = ',La', snippetType = 'autosnippet' }, { t '\\Lambda' }),
+  s({ trig = ',Xi', snippetType = 'autosnippet' }, { t '\\Xi' }),
+  s({ trig = ',Pi', snippetType = 'autosnippet' }, { t '\\Pi' }),
+  s({ trig = ',Si', snippetType = 'autosnippet' }, { t '\\Sigma' }),
+  s({ trig = ',Up', snippetType = 'autosnippet' }, { t '\\Upsilon' }),
+  s({ trig = ',Ph', snippetType = 'autosnippet' }, { t '\\Phi' }),
+  s({ trig = ',Ps', snippetType = 'autosnippet' }, { t '\\Psi' }),
+  s({ trig = ',Om', snippetType = 'autosnippet' }, { t '\\Omega' }),
+}
+
+local text_fraction_snippets = {
+  s({ trig = '(.*),12', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '½' }),
+  s({ trig = '(.*),13', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅓' }),
+  s({ trig = '(.*),23', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅔' }),
+  s({ trig = '(.*),14', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '¼' }),
+  s({ trig = '(.*),34', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '¾' }),
+  s({ trig = '(.*),15', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅕' }),
+  s({ trig = '(.*),25', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅖' }),
+  s({ trig = '(.*),35', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅗' }),
+  s({ trig = '(.*),45', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅘' }),
+  s({ trig = '(.*),16', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅙' }),
+  s({ trig = '(.*),56', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅚' }),
+  s({ trig = '(.*),18', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅛' }),
+  s({ trig = '(.*),38', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅜' }),
+  s({ trig = '(.*),58', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅝' }),
+  s({ trig = '(.*),78', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅞' }),
+}
+
+local math_snippets = {
+  s({ trig = '.ff', snippetType = 'autosnippet', desc = 'Fraction' }, fmta('\\frac{<>}{<>}', { i(1), i(2) })),
+  s({ trig = '.lim', snippetType = 'autosnippet', desc = 'Limit' }, fmta('\\lim_{<> \\to <>}', { i(1), i(2) })),
+  s({ trig = '.din', snippetType = 'autosnippet', desc = 'Definite Integral' }, fmta('\\int_{<>}^{<>}', { i(1), i(2) })),
+  s({ trig = '.ind', snippetType = 'autosnippet', desc = 'Indefinite Integral' }, fmta('\\int ', {})),
+}
+
+local markdown_snippets = {
+  s({ trig = ';im', snippetType = 'autosnippet', desc = 'Inline Math' }, fmta('$<>$', { i(0) })),
+  s({ trig = ';mm', snippetType = 'autosnippet', desc = 'Display Math' }, fmta('$$<>$$', { i(0) })),
+}
+
+local tex_snippets = {
+  s({ trig = '([^%s]*)(%s*),df', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°F' }),
+  s({ trig = '([^%s]*)(%s*),dc', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°C' }),
+  s({ trig = ',ts', snippetType = 'autosnippet' }, { t 'Teaspoon' }),
+  s({ trig = ',tb', snippetType = 'autosnippet' }, { t 'Tablespoon' }),
+  s({ trig = ',cu', snippetType = 'autosnippet' }, { t 'Cup' }),
+  s({ trig = ',oz', snippetType = 'autosnippet' }, { t 'Ounce' }),
+  s(
+    { trig = ',rstep', snippetType = 'autosnippet', desc = 'Adds a step to the recipe' },
+    fmta('\\begin{step}\n<>\n\\method\n<>\n\\end{step}\n<>', { i(2), i(1), i(0) })
+  ),
+}
+
+local global_snippets = {
+  s(
+    { trig = ';aut', snippetType = 'autosnippet', desc = 'Toggle Autocomplete' },
+    f(function()
+      if vim.b.cmp_enabled then
+        vim.b.cmp_enabled = false
+        require('fidget').notify 'Suggestions Disabled'
+      else
+        vim.b.cmp_enabled = true
+        require('fidget').notify 'Suggestions Enabled'
+      end
+      RefreshCmpState()
+    end)
+  ),
+}
+
+luasnip.add_snippets('all', global_snippets)
+luasnip.add_snippets('markdown', greek_letter_snippets)
+luasnip.add_snippets('markdown', text_fraction_snippets)
+luasnip.add_snippets('markdown', math_snippets)
+luasnip.add_snippets('markdown', markdown_snippets)
+luasnip.add_snippets('tex', greek_letter_snippets)
+luasnip.add_snippets('tex', math_snippets)
+luasnip.add_snippets('tex', tex_snippets)
+
+-- Fractions
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
