@@ -1,52 +1,47 @@
+-- [[ Globals ]]
+-- Custom Global Variables for running code
+vim.g.run_code = function()
+  require('fidget').notify 'No run configuration set!'
+end
+vim.g.test_code = function()
+  require('fidget').notify 'No test configuration set!'
+end
+vim.g.build_code = function()
+  require('fidget').notify 'No build configuration set!'
+end
+vim.g.clean_code = function()
+  require('fidget').notify 'No clean configuration set!'
+end
+
 vim.g.mapleader = ' ' -- Set <space> as the leader key
 vim.g.maplocalleader = ' '
-
 vim.g.have_nerd_font = true -- Allows dependencies to use a nerd font
-
 vim.o.relativenumber = true -- Relative Line Numbers
 vim.o.number = true
-
 vim.o.mouse = '' -- Enable mouse mode, can be useful for resizing splits for example!
-
 vim.o.showmode = false -- Don't show the mode, since it's already in the status line
-
--- Sync clipboard between OS and Neovim.
-vim.schedule(function()
+vim.schedule(function() -- Sync clipboard between OS and Neovim.
   vim.o.clipboard = 'unnamedplus'
 end)
 vim.o.breakindent = true -- Enable break indent
-
 vim.o.undofile = true -- Save undo history
-
 vim.o.ignorecase = true -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.o.smartcase = true
-
 vim.o.signcolumn = 'yes' -- Keep signcolumn on by default
-
 vim.o.updatetime = 250 -- Decrease update time
-
 vim.o.timeoutlen = 300 -- Decrease mapped sequence wait time
-
 vim.o.splitright = true -- Configure how new splits should be opened
 vim.o.splitbelow = true
-
 vim.o.wrap = false -- Disable soft wrapping
-
 vim.o.list = true -- Sets how neovim will display certain whitespace characters in the editor.
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
 vim.o.inccommand = 'split' -- Preview substitutions live, as you type!
-
 vim.o.cursorline = true -- Show which line your cursor is on
-
 vim.o.scrolloff = 10 -- Minimal number of screen lines to keep above and below the cursor.
-
 -- If performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 vim.o.confirm = true
-
 vim.o.tabstop = 4
-
 vim.o.shiftwidth = 4
 
 -- [[ Basic Keymaps ]]
@@ -108,12 +103,12 @@ vim.keymap.set('n', '<leader>wD', '<C-w>D', { desc = 'Show diagnostics under the
 vim.keymap.set('n', '<leader>tm', function()
   if vim.o.mouse == 'a' then
     vim.o.mouse = ''
-    print 'Mouse: Disabled'
+    require('fidget').notify 'Mouse: Disabled'
   else
     vim.o.mouse = 'a'
-    print 'Mouse: Enabled'
+    require('fidget').notify 'Mouse: Enabled'
   end
-end)
+end, { desc = 'Toggle [M]ouse' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -126,6 +121,54 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.hl.on_yank()
+  end,
+})
+
+vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+  desc = 'CMake code configuration setter',
+  pattern = { '*.c', '*.cpp' },
+  callback = function()
+    print 'Set code configuration to CMake'
+    vim.g.run_code = function()
+      vim.cmd 'CMakeRun'
+    end
+    vim.g.test_code = function()
+      vim.cmd 'CMakeTest'
+    end
+    vim.g.clean_code = function()
+      vim.cmd 'CMakeClean'
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+  desc = 'Rust code configuration setter',
+  pattern = { '*.rs' },
+  callback = function()
+    require('fidget').notify 'Set code configuration to Rust'
+    vim.g.run_code = function()
+      vim.cmd 'RustLsp runnables'
+    end
+    vim.g.test_code = function()
+      vim.cmd 'RustLsp testables'
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd({ 'BufLeave', 'BufWinLeave' }, {
+  callback = function()
+    vim.g.run_code = function()
+      require('fidget').notify 'No run configuration set!'
+    end
+    vim.g.test_code = function()
+      require('fidget').notify 'No test configuration set!'
+    end
+    vim.g.build_code = function()
+      require('fidget').notify 'No build configuration set!'
+    end
+    vim.g.clean_code = function()
+      require('fidget').notify 'No clean configuration set!'
+    end
   end,
 })
 
@@ -1409,19 +1452,19 @@ require('lazy').setup({
         -- visual mode
         map('v', '<leader>hs', function()
           gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'git [s]tage hunk' })
+        end, { desc = 'Git [S]tage Hunk' })
         map('v', '<leader>hr', function()
           gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'git [r]eset hunk' })
+        end, { desc = 'Git [R]eset Hunk' })
         -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
-        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
-        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
-        map('n', '<leader>hu', gitsigns.stage_hunk, { desc = 'git [u]ndo stage hunk' })
-        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
-        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
+        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Git [s]tage Hunk' })
+        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Git [r]eset Hunk' })
+        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Git [S]tage Buffer' })
+        map('n', '<leader>hu', gitsigns.stage_hunk, { desc = 'Git [u]ndo stage Hunk' })
+        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Git [R]eset Buffer' })
+        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Git [p]review Hunk' })
+        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Git [b]lame Line' })
+        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Git [d]iff Against Index' })
         map('n', '<leader>hD', function()
           gitsigns.diffthis '@'
         end, { desc = 'git [D]iff against last commit' })
@@ -1453,31 +1496,10 @@ require('lazy').setup({
   },
 })
 
-function BuildCode()
-  vim.print 'Code Building has not been configured for this file type.'
-end
-function CleanCode()
-  vim.print 'Code Cleaning has not been configured for this file type.'
-end
-function RunCode()
-  vim.print 'Code Running has not been configured for this file type.'
-end
-function TestCode()
-  vim.print 'Code Running has not been configured for this file type.'
-end
-
-vim.keymap.set('n', '<leader>cr', function()
-  RunCode()
-end, { desc = '[R]un Code' })
-vim.keymap.set('n', '<leader>cb', function()
-  BuildCode()
-end, { desc = '[B]uild Code' })
-vim.keymap.set('n', '<leader>cc', function()
-  CleanCode()
-end, { desc = '[C]lean Code' })
-vim.keymap.set('n', '<leader>ct', function()
-  TestCode()
-end, { desc = '[T]est Code' })
+vim.keymap.set('n', '<leader>cr', vim.g.run_code, { desc = '[R]un Code' })
+vim.keymap.set('n', '<leader>cb', vim.g.build_code, { desc = '[B]uild Code' })
+vim.keymap.set('n', '<leader>cc', vim.g.clean_code, { desc = '[C]lean Code' })
+vim.keymap.set('n', '<leader>ct', vim.g.test_code, { desc = '[T]est Code' })
 
 vim.diagnostic.config {
   virtual_text = {

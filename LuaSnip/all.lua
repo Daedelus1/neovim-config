@@ -19,10 +19,10 @@ return {
     f(function()
       if vim.b.cmp_enabled then
         vim.b.cmp_enabled = false
-        vim.print 'Suggestions Disabled'
+        require('fidget').notify 'Suggestions Disabled'
       else
         vim.b.cmp_enabled = true
-        vim.print 'Suggestions Enabled'
+        require('fidget').notify 'Suggestions Enabled'
       end
       RefreshCmpState()
     end)
