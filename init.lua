@@ -13,6 +13,7 @@ vim.g.clean_code = function()
   require('fidget').notify 'No clean configuration set!'
 end
 
+-- [[Options]]
 vim.g.mapleader = ' ' -- Set <space> as the leader key
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true -- Allows dependencies to use a nerd font
@@ -45,70 +46,6 @@ vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 
 -- [[ Basic Keymaps ]]
-
--- Clear highlights on search when pressing <Esc> in normal mode
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-
--- Diagnostic keymaps
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
--- Window Leader Remap from <C-w> to <leader>w
-vim.keymap.set('n', '<leader>wd', '<C-w>d', { desc = 'Show diagnostics under the cursor' })
-vim.keymap.set('n', '<leader>wh', '<C-w>h', { desc = 'Go to the left window' })
-vim.keymap.set('n', '<leader>wH', '<C-w>H', { desc = 'Move window to far left' })
-vim.keymap.set('n', '<leader>wj', '<C-w>j', { desc = 'Go to the down window' })
-vim.keymap.set('n', '<leader>wJ', '<C-w>J', { desc = 'Move window to far bottom' })
-vim.keymap.set('n', '<leader>wk', '<C-w>k', { desc = 'Go to the up window' })
-vim.keymap.set('n', '<leader>wK', '<C-w>K', { desc = 'Move window to far top' })
-vim.keymap.set('n', '<leader>wl', '<C-w>l', { desc = 'Go to the right window' })
-vim.keymap.set('n', '<leader>wL', '<C-w>L', { desc = 'Move window to far right' })
-vim.keymap.set('n', '<leader>wo', '<C-w>o', { desc = 'Close all other windows' })
-vim.keymap.set('n', '<leader>wp', '<C-w>p', { desc = 'Quit a window' })
-vim.keymap.set('n', '<leader>ws', '<C-w>s', { desc = 'Split window' })
-vim.keymap.set('n', '<leader>wT', '<C-w>T', { desc = 'Break out into a new tab' })
-vim.keymap.set('n', '<leader>wv', '<C-w>v', { desc = 'Split window vertically' })
-vim.keymap.set('n', '<leader>ww', '<C-w>w', { desc = 'Switch windows' })
-vim.keymap.set('n', '<leader>wx', '<C-w>x', { desc = 'Swap current with next' })
-vim.keymap.set('n', '<leader>w+', '<C-w>+', { desc = 'Increase height' })
-vim.keymap.set('n', '<leader>w-', '<C-w>-', { desc = 'Decrease height' })
-vim.keymap.set('n', '<leader>w<', '<C-w><', { desc = 'Decrease width' })
-vim.keymap.set('n', '<leader>w=', '<C-w>=', { desc = 'Equally high and wide' })
-vim.keymap.set('n', '<leader>w>', '<C-w>>', { desc = 'Increase width' })
-vim.keymap.set('n', '<leader>w_', '<C-w>_', { desc = 'Max out the height' })
-vim.keymap.set('n', '<leader>w|', '<C-w>|', { desc = 'Max out the width' })
-vim.keymap.set('n', '<leader>wD', '<C-w>D', { desc = 'Show diagnostics under the cursor' })
-
-vim.keymap.set('n', '<leader>tm', function()
-  if vim.o.mouse == 'a' then
-    vim.o.mouse = ''
-    require('fidget').notify 'Mouse: Disabled'
-  else
-    vim.o.mouse = 'a'
-    require('fidget').notify 'Mouse: Enabled'
-  end
-end, { desc = 'Toggle [M]ouse' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -1496,6 +1433,63 @@ require('lazy').setup({
   },
 })
 
+-- [[Keymap]]
+local toggle_mouse = function()
+  if vim.o.mouse == 'a' then
+    vim.o.mouse = ''
+    require('fidget').notify 'Mouse: Disabled'
+  else
+    vim.o.mouse = 'a'
+    require('fidget').notify 'Mouse: Enabled'
+  end
+end
+
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- TIP: Disable arrow keys in normal mode
+-- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+-- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+-- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+-- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+
+-- Keybinds to make split navigation easier.
+--  Use CTRL+<hjkl> to switch between windows
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Window Leader Remap from <C-w> to <leader>w
+vim.keymap.set('n', '<leader>wd', '<C-w>d', { desc = 'Show diagnostics under the cursor' })
+vim.keymap.set('n', '<leader>wh', '<C-w>h', { desc = 'Go to the left window' })
+vim.keymap.set('n', '<leader>wH', '<C-w>H', { desc = 'Move window to far left' })
+vim.keymap.set('n', '<leader>wj', '<C-w>j', { desc = 'Go to the down window' })
+vim.keymap.set('n', '<leader>wJ', '<C-w>J', { desc = 'Move window to far bottom' })
+vim.keymap.set('n', '<leader>wk', '<C-w>k', { desc = 'Go to the up window' })
+vim.keymap.set('n', '<leader>wK', '<C-w>K', { desc = 'Move window to far top' })
+vim.keymap.set('n', '<leader>wl', '<C-w>l', { desc = 'Go to the right window' })
+vim.keymap.set('n', '<leader>wL', '<C-w>L', { desc = 'Move window to far right' })
+vim.keymap.set('n', '<leader>wo', '<C-w>o', { desc = 'Close all other windows' })
+vim.keymap.set('n', '<leader>wp', '<C-w>p', { desc = 'Quit a window' })
+vim.keymap.set('n', '<leader>ws', '<C-w>s', { desc = 'Split window' })
+vim.keymap.set('n', '<leader>wT', '<C-w>T', { desc = 'Break out into a new tab' })
+vim.keymap.set('n', '<leader>wv', '<C-w>v', { desc = 'Split window vertically' })
+vim.keymap.set('n', '<leader>ww', '<C-w>w', { desc = 'Switch windows' })
+vim.keymap.set('n', '<leader>wx', '<C-w>x', { desc = 'Swap current with next' })
+vim.keymap.set('n', '<leader>w+', '<C-w>+', { desc = 'Increase height' })
+vim.keymap.set('n', '<leader>w-', '<C-w>-', { desc = 'Decrease height' })
+vim.keymap.set('n', '<leader>w<', '<C-w><', { desc = 'Decrease width' })
+vim.keymap.set('n', '<leader>w=', '<C-w>=', { desc = 'Equally high and wide' })
+vim.keymap.set('n', '<leader>w>', '<C-w>>', { desc = 'Increase width' })
+vim.keymap.set('n', '<leader>w_', '<C-w>_', { desc = 'Max out the height' })
+vim.keymap.set('n', '<leader>w|', '<C-w>|', { desc = 'Max out the width' })
+vim.keymap.set('n', '<leader>wD', '<C-w>D', { desc = 'Show diagnostics under the cursor' })
+
+vim.keymap.set('n', '<leader>tm', toggle_mouse, { desc = 'Toggle [M]ouse' })
+
 vim.keymap.set('n', '<leader>cr', vim.g.run_code, { desc = '[R]un Code' })
 vim.keymap.set('n', '<leader>cb', vim.g.build_code, { desc = '[B]uild Code' })
 vim.keymap.set('n', '<leader>cc', vim.g.clean_code, { desc = '[C]lean Code' })
@@ -1657,8 +1651,6 @@ luasnip.add_snippets('markdown', markdown_snippets)
 luasnip.add_snippets('tex', greek_letter_snippets)
 luasnip.add_snippets('tex', math_snippets)
 luasnip.add_snippets('tex', tex_snippets)
-
--- Fractions
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
