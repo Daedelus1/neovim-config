@@ -783,16 +783,6 @@ require('lazy').setup({
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'enter',
 
-        vim.keymap.set({ 'i' }, '<Tab>', function()
-          require('luasnip').expand()
-        end, { silent = true }),
-        vim.keymap.set({ 'i', 's' }, '<Tab>', function()
-          require('luasnip').jump(1)
-        end, { silent = true }),
-        vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
-          require('luasnip').jump(-1)
-        end, { silent = true }),
-
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
@@ -1523,6 +1513,16 @@ end, { desc = 'Show [L]ast Notification' })
 vim.keymap.set('n', '<leader>nh', function()
   vim.cmd 'Noice history'
 end, { desc = 'Show Notification [H]istory' })
+
+vim.keymap.set({ 'i' }, '<Tab>', function()
+  require('luasnip').expand()
+end, { silent = true })
+vim.keymap.set({ 'i', 's' }, '<Tab>', function()
+  require('luasnip').jump(1)
+end, { silent = true })
+vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
+  require('luasnip').jump(-1)
+end, { silent = true })
 
 -- [[ Snippets ]]
 local luasnip = require 'luasnip'
