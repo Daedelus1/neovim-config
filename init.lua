@@ -1020,23 +1020,9 @@ require('lazy').setup({
     },
   },
   {
-    'folke/flash.nvim',
-    event = 'VeryLazy',
-    vscode = true,
-    opts = {},
-    -- stylua: ignore
-    keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-      { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
-    },
-    {
-      'mrcjkb/rustaceanvim',
-      version = '^6', -- Recommended
-      lazy = false, -- This plugin is already lazy
-    },
+    'mrcjkb/rustaceanvim',
+    version = '^6', -- Recommended
+    lazy = false, -- This plugin is already lazy
   },
   {
     'Civitasv/cmake-tools.nvim',
@@ -1055,34 +1041,6 @@ require('lazy').setup({
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
       'nvim-tree/nvim-web-devicons', -- optional, but recommended
-    },
-    keys = {
-      {
-        '<leader>st',
-        mode = { 'n', 'x', 'o' },
-        function()
-          local reveal_file = vim.fn.expand '%:p'
-          if reveal_file == '' then
-            reveal_file = vim.fn.getcwd()
-          else
-            local f = io.open(reveal_file, 'r')
-            if f then
-              f.close(f)
-            else
-              reveal_file = vim.fn.getcwd()
-            end
-          end
-          require('neo-tree.command').execute {
-            action = 'focus', -- OPTIONAL, this is the default value
-            source = 'filesystem', -- OPTIONAL, this is the default value
-            position = 'left', -- OPTIONAL, this is the default value
-            reveal_file = reveal_file, -- path to file or folder to reveal
-            reveal_force_cwd = true, -- change cwd without asking if needed
-            toggle = true,
-          }
-        end,
-        desc = 'Neo[T]ree',
-      },
     },
     lazy = false, -- neo-tree will lazily load itself
   },
@@ -1112,59 +1070,6 @@ require('lazy').setup({
 
       -- Add your own debuggers here
       'leoluz/nvim-dap-go',
-    },
-    keys = {
-      -- Basic debugging keymaps, feel free to change to your liking!
-      {
-        '<F10>',
-        function()
-          require('dap').continue()
-        end,
-        desc = 'Debug: Start/Continue',
-      },
-      {
-        '<F9>',
-        function()
-          require('dap').step_into()
-        end,
-        desc = 'Debug: Step Into',
-      },
-      {
-        '<F7>',
-        function()
-          require('dap').step_over()
-        end,
-        desc = 'Debug: Step Over',
-      },
-      {
-        '<F8>',
-        function()
-          require('dap').step_out()
-        end,
-        desc = 'Debug: Step Out',
-      },
-      {
-        '<leader>b',
-        function()
-          require('dap').toggle_breakpoint()
-        end,
-        desc = 'Debug: Toggle Breakpoint',
-      },
-      {
-        '<leader>B',
-        function()
-          require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-        end,
-        desc = 'Debug: Set Breakpoint',
-      },
-      -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-      {
-        '<leader>d',
-        function()
-          require('dapui').toggle()
-        end,
-        desc = 'Debug: See last session result.',
-      },
     },
     config = function()
       local dap = require 'dap'
@@ -1349,56 +1254,7 @@ require('lazy').setup({
   {
     'lewis6991/gitsigns.nvim',
     opts = {
-      on_attach = function(bufnr)
-        local gitsigns = require 'gitsigns'
-
-        local function map(mode, l, r, opts)
-          opts = opts or {}
-          opts.buffer = bufnr
-          vim.keymap.set(mode, l, r, opts)
-        end
-
-        -- Navigation
-        map('n', ']c', function()
-          if vim.wo.diff then
-            vim.cmd.normal { ']c', bang = true }
-          else
-            gitsigns.nav_hunk 'next'
-          end
-        end, { desc = 'Jump to next git [c]hange' })
-
-        map('n', '[c', function()
-          if vim.wo.diff then
-            vim.cmd.normal { '[c', bang = true }
-          else
-            gitsigns.nav_hunk 'prev'
-          end
-        end, { desc = 'Jump to previous git [c]hange' })
-
-        -- Actions
-        -- visual mode
-        map('v', '<leader>hs', function()
-          gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'Git [S]tage Hunk' })
-        map('v', '<leader>hr', function()
-          gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-        end, { desc = 'Git [R]eset Hunk' })
-        -- normal mode
-        map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Git [s]tage Hunk' })
-        map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Git [r]eset Hunk' })
-        map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Git [S]tage Buffer' })
-        map('n', '<leader>hu', gitsigns.stage_hunk, { desc = 'Git [u]ndo stage Hunk' })
-        map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Git [R]eset Buffer' })
-        map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Git [p]review Hunk' })
-        map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Git [b]lame Line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Git [d]iff Against Index' })
-        map('n', '<leader>hD', function()
-          gitsigns.diffthis '@'
-        end, { desc = 'git [D]iff against last commit' })
-        -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
-        map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
-      end,
+      on_attach = GitsignsKeymap(),
     },
   },
 }, {
@@ -1424,6 +1280,7 @@ require('lazy').setup({
 })
 
 -- [[Keymap]]
+
 local toggle_mouse = function()
   if vim.o.mouse == 'a' then
     vim.o.mouse = ''
@@ -1443,6 +1300,79 @@ local cycle_tabwidth = function()
     vim.o.shiftwidth = 4
   end
   require('fidget').notify(string.format('Tabwith set to %d', vim.o.tabstop))
+end
+
+local toggle_neotree = function()
+  local reveal_file = vim.fn.expand '%:p'
+  if reveal_file == '' then
+    reveal_file = vim.fn.getcwd()
+  else
+    local f = io.open(reveal_file, 'r')
+    if f then
+      f.close(f)
+    else
+      reveal_file = vim.fn.getcwd()
+    end
+  end
+  require('neo-tree.command').execute {
+    action = 'focus', -- OPTIONAL, this is the default value
+    source = 'filesystem', -- OPTIONAL, this is the default value
+    position = 'left', -- OPTIONAL, this is the default value
+    reveal_file = reveal_file, -- path to file or folder to reveal
+    reveal_force_cwd = true, -- change cwd without asking if needed
+    toggle = true,
+  }
+end
+
+GitsignsKeymap = function(bufnr)
+  local gitsigns = require 'gitsigns'
+
+  local function map(mode, l, r, opts)
+    opts = opts or {}
+    opts.buffer = bufnr
+    vim.keymap.set(mode, l, r, opts)
+  end
+
+  -- Navigation
+  map('n', ']c', function()
+    if vim.wo.diff then
+      vim.cmd.normal { ']c', bang = true }
+    else
+      gitsigns.nav_hunk 'next'
+    end
+  end, { desc = 'Jump to next git [c]hange' })
+
+  map('n', '[c', function()
+    if vim.wo.diff then
+      vim.cmd.normal { '[c', bang = true }
+    else
+      gitsigns.nav_hunk 'prev'
+    end
+  end, { desc = 'Jump to previous git [c]hange' })
+
+  -- Actions
+  -- visual mode
+  map('v', '<leader>hs', function()
+    gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
+  end, { desc = 'Git [S]tage Hunk' })
+  map('v', '<leader>hr', function()
+    gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
+  end, { desc = 'Git [R]eset Hunk' })
+  -- normal mode
+  map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'Git [s]tage Hunk' })
+  map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'Git [r]eset Hunk' })
+  map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'Git [S]tage Buffer' })
+  map('n', '<leader>hu', gitsigns.stage_hunk, { desc = 'Git [u]ndo stage Hunk' })
+  map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'Git [R]eset Buffer' })
+  map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Git [p]review Hunk' })
+  map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Git [b]lame Line' })
+  map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Git [d]iff Against Index' })
+  map('n', '<leader>hD', function()
+    gitsigns.diffthis '@'
+  end, { desc = 'git [D]iff against last commit' })
+  -- Toggles
+  map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
+  map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
 end
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -1515,7 +1445,7 @@ vim.keymap.set('n', '<leader>nh', function()
 end, { desc = 'Show Notification [H]istory' })
 
 vim.keymap.set({ 'i' }, '<Tab>', function()
-  require('luasnip').expand()
+  require('luasnip').expand {}
 end, { silent = true })
 vim.keymap.set({ 'i', 's' }, '<Tab>', function()
   require('luasnip').jump(1)
@@ -1523,6 +1453,30 @@ end, { silent = true })
 vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
   require('luasnip').jump(-1)
 end, { silent = true })
+
+vim.keymap.set({ 'i', 'v', 'n' }, '<F10>', function()
+  require('dap').continue()
+end, { desc = 'Debug: Start/Continue' })
+vim.keymap.set({ 'i', 'v', 'n' }, '<F9>', function()
+  require('dap').step_into()
+end, { desc = 'Debug: Step Into' })
+vim.keymap.set({ 'i', 'v', 'n' }, '<F7>', function()
+  require('dap').step_over()
+end, { desc = 'Debug: Step Over' })
+vim.keymap.set({ 'i', 'v', 'n' }, '<F8>', function()
+  require('dap').step_out()
+end, { desc = 'Debug: Step Out' })
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>b', function()
+  require('dap').toggle_breakpoint()
+end, { desc = 'Debug: Toggle Breakpoint' })
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>B', function()
+  require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
+end, { desc = 'Debug: Set Breakpoint' })
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>d', function()
+  require('dapui').toggle()
+end, { desc = 'Debug: See last session result.' })
+
+vim.keymap.set({ 'n', 'x', 'o' }, '<leader>st', toggle_neotree, { desc = 'Toggle Neo[t]ree' })
 
 -- [[ Snippets ]]
 local luasnip = require 'luasnip'
