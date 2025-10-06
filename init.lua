@@ -1254,7 +1254,9 @@ require('lazy').setup({
   {
     'lewis6991/gitsigns.nvim',
     opts = {
-      on_attach = GitsignsKeymap(),
+      on_attach = function(bufnr)
+        GitsignsKeymap(bufnr)
+      end,
     },
   },
 }, {
@@ -1324,7 +1326,7 @@ local toggle_neotree = function()
   }
 end
 
-GitsignsKeymap = function(bufnr)
+function GitsignsKeymap(bufnr)
   local gitsigns = require 'gitsigns'
 
   local function map(mode, l, r, opts)
