@@ -264,6 +264,7 @@ require('lazy').setup({
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>w', group = '[W]indow' },
         { '<leader>n', group = '[N]otification' },
+        { '<leader>d', group = '[D]ebug' },
       },
     },
   },
@@ -352,7 +353,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[ ] [S]earch existing [b]uffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -674,7 +675,7 @@ require('lazy').setup({
     cmd = { 'ConformInfo' },
     keys = {
       {
-        '<leader>f',
+        '<leader>cf',
         function()
           require('conform').format { async = true, lsp_format = 'fallback' }
         end,
@@ -1379,7 +1380,7 @@ end
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>cq', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
@@ -1456,27 +1457,27 @@ vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
   require('luasnip').jump(-1)
 end, { silent = true })
 
-vim.keymap.set({ 'i', 'v', 'n' }, '<F10>', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>ds', function()
   require('dap').continue()
 end, { desc = 'Debug: Start/Continue' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<F9>', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>di', function()
   require('dap').step_into()
 end, { desc = 'Debug: Step Into' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<F7>', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>do', function()
   require('dap').step_over()
 end, { desc = 'Debug: Step Over' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<F8>', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>dO', function()
   require('dap').step_out()
 end, { desc = 'Debug: Step Out' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>b', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>db', function()
   require('dap').toggle_breakpoint()
 end, { desc = 'Debug: Toggle Breakpoint' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>B', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>dB', function()
   require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
 end, { desc = 'Debug: Set Breakpoint' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>d', function()
+vim.keymap.set({ 'i', 'v', 'n' }, '<leader>dd', function()
   require('dapui').toggle()
-end, { desc = 'Debug: See last session result.' })
+end, { desc = 'Debug: Toggle UI.' })
 
 vim.keymap.set({ 'n', 'x', 'o' }, '<leader>st', toggle_neotree, { desc = 'Toggle Neo[t]ree' })
 
