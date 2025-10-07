@@ -1,17 +1,9 @@
 -- [[ Globals ]]
 -- Custom Global Variables for running code
-vim.g.run_code = function()
-  require('fidget').notify 'No run configuration set!'
-end
-vim.g.test_code = function()
-  require('fidget').notify 'No test configuration set!'
-end
-vim.g.build_code = function()
-  require('fidget').notify 'No build configuration set!'
-end
-vim.g.clean_code = function()
-  require('fidget').notify 'No clean configuration set!'
-end
+vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
+vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
+vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
+vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
 
 -- [[Options]]
 vim.g.mapleader = ' ' -- Set <space> as the leader key
@@ -61,50 +53,28 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
-vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
-  desc = 'CMake code configuration setter',
-  pattern = { '*.c', '*.cpp' },
-  callback = function()
-    print 'Set code configuration to CMake'
-    vim.g.run_code = function()
-      vim.cmd 'CMakeRun'
-    end
-    vim.g.test_code = function()
-      vim.cmd 'CMakeTest'
-    end
-    vim.g.clean_code = function()
-      vim.cmd 'CMakeClean'
-    end
-  end,
-})
-
-vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
-  desc = 'Rust code configuration setter',
-  pattern = { '*.rs' },
-  callback = function()
-    require('fidget').notify 'Set code configuration to Rust'
-    vim.g.run_code = function()
-      vim.cmd 'RustLsp runnables'
-    end
-    vim.g.test_code = function()
-      vim.cmd 'RustLsp testables'
-    end
-  end,
-})
-
-vim.api.nvim_create_autocmd({ 'BufLeave', 'BufWinLeave' }, {
-  callback = function()
-    vim.g.run_code = function()
-      require('fidget').notify 'No run configuration set!'
-    end
-    vim.g.test_code = function()
-      require('fidget').notify 'No test configuration set!'
-    end
-    vim.g.build_code = function()
-      require('fidget').notify 'No build configuration set!'
-    end
-    vim.g.clean_code = function()
-      require('fidget').notify 'No clean configuration set!'
+vim.api.nvim_create_autocmd({ 'BufEnter' }, {
+  callback = function(args)
+    local ft = vim.bo[args.buf].filetype
+    -- require('fidget').notify('Filetype is ' .. ft)
+    if ft == 'rust' then
+      -- require('fidget').notify 'Set code configuration to CMake'
+      vim.g.run_code_command = 'RustLsp runnables'
+      vim.g.test_code_command = 'RustLsp testables'
+      vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
+      vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
+    elseif ft == 'c' or 'ft' == 'cpp' then
+      -- require('fidget').notify 'Set code configuration to Rust'
+      vim.g.run_code_command = 'CMakeRun'
+      vim.g.test_code_command = 'CMakeTest'
+      vim.g.build_code_command = 'CMakeBuild'
+      vim.g.clean_code_command = 'CMakeClean'
+    else
+      -- require('fidget').notify 'Code configuration Reset!'
+      vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
+      vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
+      vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
+      vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
     end
   end,
 })
@@ -1102,15 +1072,15 @@ require('lazy').setup({
         icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
         controls = {
           icons = {
-            pause = '',
-            play = '▶',
-            step_into = '⏎',
-            step_over = '󰒭',
-            step_out = '󰒮',
-            step_back = 'b',
-            run_last = '▶▶',
-            terminate = '󰓛',
-            disconnect = '󰇪',
+            pause = '',
+            play = '',
+            step_into = '',
+            step_over = '',
+            step_out = '',
+            step_back = '',
+            run_last = '',
+            terminate = '',
+            disconnect = '',
           },
         },
       }
@@ -1132,17 +1102,17 @@ require('lazy').setup({
       dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
       -- Install golang specific config
-      require('dap-go').setup {
-        delve = {
-          -- On Windows delve must be run attached or it crashes.
-          -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-          detached = vim.fn.has 'win32' == 0,
-        },
-      }
+      -- require('dap-go').setup {
+      --   delve = {
+      --     -- On Windows delve must be run attached or it crashes.
+      --     -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
+      --     detached = vim.fn.has 'win32' == 0,
+      --   },
+      -- }
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = 'C:\\Users\\Ethan\\.vscode\\extensions\\ms-vscode.cpptools-1.26.3-win32-x64\\debugAdapters\\bin\\OpenDebugAD7.exe',
+        command = 'C:\\Users\\Ethan\\.vscode\\extensions\\ms-vscode.cpptools-1.27.7-win32-x64\\debugAdapters\\bin\\OpenDebugAD7.exe',
         options = {
           detached = false,
         },
@@ -1372,10 +1342,23 @@ function GitsignsKeymap(bufnr)
   map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Git [d]iff Against Index' })
   map('n', '<leader>hD', function()
     gitsigns.diffthis '@'
-  end, { desc = 'git [D]iff against last commit' })
+  end, { desc = 'Git [D]iff against last commit' })
   -- Toggles
   map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
   map('n', '<leader>tD', gitsigns.preview_hunk_inline, { desc = '[T]oggle git show [D]eleted' })
+end
+
+vim.g.run_code = function()
+  vim.cmd(vim.g.run_code_command)
+end
+vim.g.test_code = function()
+  vim.cmd(vim.g.test_code_command)
+end
+vim.g.build_code = function()
+  vim.cmd(vim.g.build_code_command)
+end
+vim.g.clean_code = function()
+  vim.cmd(vim.g.clean_code_command)
 end
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -1457,25 +1440,26 @@ vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
   require('luasnip').jump(-1)
 end, { silent = true })
 
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>ds', function()
+vim.keymap.set({ 'n' }, '<leader>ds', function()
   require('dap').continue()
-end, { desc = 'Debug: Start/Continue' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>di', function()
+end, { desc = 'Debug: [S]tart/Continue' })
+vim.keymap.set({ 'n' }, '<leader>di', function()
   require('dap').step_into()
-end, { desc = 'Debug: Step Into' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>do', function()
+end, { desc = 'Debug: Step [I]nto' })
+vim.keymap.set({ 'n' }, '<leader>do', function()
   require('dap').step_over()
-end, { desc = 'Debug: Step Over' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>dO', function()
+end, { desc = 'Debug: Step [O]ver' })
+vim.keymap.set({ 'n' }, '<leader>du', function()
   require('dap').step_out()
-end, { desc = 'Debug: Step Out' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>db', function()
+end, { desc = 'Debug: Step O[u]t' })
+vim.keymap.set({ 'n' }, '<leader>db', function()
   require('dap').toggle_breakpoint()
-end, { desc = 'Debug: Toggle Breakpoint' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>dB', function()
-  require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-end, { desc = 'Debug: Set Breakpoint' })
-vim.keymap.set({ 'i', 'v', 'n' }, '<leader>dd', function()
+end, { desc = 'Debug: Toggle [B]reakpoint' })
+vim.keymap.set({ 'n' }, '<leader>dc', function()
+  require('dap').run_to_cursor()
+end, { desc = 'Debug: Run to [C]ursor' })
+
+vim.keymap.set({ 'n' }, '<leader>dd', function()
   require('dapui').toggle()
 end, { desc = 'Debug: Toggle UI.' })
 
@@ -1513,7 +1497,7 @@ local get_visual = function(args, parent)
 end
 -- Example: expanding a snippet on a new line only.
 -- In a snippet file, first require the line_begin condition...
-local line_begin = require('luasnip.extras.expand_conditions').line_begin
+--local line_begin = require('luasnip.extras.expand_conditions').line_begin
 
 -- Greek Letters
 local greek_letter_snippets = {
