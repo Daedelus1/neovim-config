@@ -130,7 +130,7 @@ end
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
 
-  -- 'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  --'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -311,42 +311,6 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
-
-      -- See `:help telescope.builtin`
-      local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[ ] [S]earch existing [b]uffers' })
-
-      -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader>/', function()
-        -- You can pass additional configuration to Telescope to change the theme, layout, etc.
-        builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
-          previewer = false,
-        })
-      end, { desc = '[/] Fuzzily search in current buffer' })
-
-      -- It's also possible to pass additional configuration options.
-      --  See `:help telescope.builtin.live_grep()` for information about particular keys
-      vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep {
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        }
-      end, { desc = '[S]earch [/] in Open Files' })
-
-      -- Shortcut for searching your Neovim configuration files
-      vim.keymap.set('n', '<leader>sc', function()
-        builtin.find_files { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[S]earch Neovim [C]onfig' })
     end,
   },
 
@@ -752,8 +716,7 @@ require('lazy').setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = 'enter',
-
+        preset = 'default',
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
@@ -767,7 +730,13 @@ require('lazy').setup({
       completion = {
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        documentation = { auto_show = true, auto_show_delay_ms = 500 },
+        list = {
+          selection = {
+            preselect = false,
+            auto_insert = false,
+          },
+        },
       },
 
       sources = {
@@ -920,10 +889,10 @@ require('lazy').setup({
     'lervag/vimtex',
     lazy = false,
     config = function()
-      vim.g.vimtex_view_method = 'general' -- or 'sumatrapdf'
+      --vim.g.vimtex_view_method = 'general' -- or 'sumatrapdf'
       vim.g.vimtex_view_general_viewer = 'SumatraPDF'
-      vim.g.vimtex_view_general_options = '-reuse-instance -bg-color 0xffffff -presentation -forward-search @tex @line @pdf'
-      vim.g.vimtex_compiler_progname = 'nvr'
+      vim.g.vimtex_view_general_options = '-reuse-instance -bg-color 0xffffff -forward-search @tex @line @pdf'
+      -- vim.g.vimtex_compiler_progname = 'nvr'
       vim.g.vimtex_compiler_latexmk = {
         options = {
           '-pdf',
@@ -1102,13 +1071,13 @@ require('lazy').setup({
       dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
       -- Install golang specific config
-      -- require('dap-go').setup {
-      --   delve = {
-      --     -- On Windows delve must be run attached or it crashes.
-      --     -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-      --     detached = vim.fn.has 'win32' == 0,
-      --   },
-      -- }
+      require('dap-go').setup {
+        delve = {
+          -- On Windows delve must be run attached or it crashes.
+          -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
+          detached = vim.fn.has 'win32' == 0,
+        },
+      }
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
@@ -1355,11 +1324,6 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 -- Window Leader Remap from <C-w> to <leader>w
 vim.keymap.set('n', '<leader>wd', '<C-w>d', { desc = 'Show diagnostics under the cursor' })
 vim.keymap.set('n', '<leader>wh', '<C-w>h', { desc = 'Go to the left window' })
@@ -1446,6 +1410,48 @@ end, { desc = 'Debug: Toggle UI.' })
 
 vim.keymap.set({ 'n', 'x', 'o' }, '<leader>st', toggle_neotree, { desc = 'Toggle Neo[t]ree' })
 
+-- Telescope
+
+-- See `:help telescope.builtin`
+local telescope_builtin = require 'telescope.builtin'
+vim.keymap.set('n', '<leader>sh', telescope_builtin.help_tags, { desc = '[S]earch [H]elp' })
+vim.keymap.set('n', '<leader>sk', telescope_builtin.keymaps, { desc = '[S]earch [K]eymaps' })
+vim.keymap.set('n', '<leader>sf', telescope_builtin.find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>ss', telescope_builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
+vim.keymap.set('n', '<leader>sw', telescope_builtin.grep_string, { desc = '[S]earch current [W]ord' })
+vim.keymap.set('n', '<leader>sg', telescope_builtin.live_grep, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<leader>sd', telescope_builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sr', telescope_builtin.resume, { desc = '[S]earch [R]esume' })
+vim.keymap.set('n', '<leader>s.', telescope_builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+vim.keymap.set('n', '<leader>sb', telescope_builtin.buffers, { desc = '[ ] [S]earch existing [b]uffers' })
+
+-- Slightly advanced example of overriding default behavior and theme
+vim.keymap.set('n', '<leader>/', function()
+  -- You can pass additional configuration to Telescope to change the theme, layout, etc.
+  telescope_builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+    winblend = 10,
+    previewer = false,
+  })
+end, { desc = '[/] Fuzzily search in current buffer' })
+
+-- It's also possible to pass additional configuration options.
+--  See `:help telescope.builtin.live_grep()` for information about particular keys
+vim.keymap.set('n', '<leader>s/', function()
+  telescope_builtin.live_grep {
+    grep_open_files = true,
+    prompt_title = 'Live Grep in Open Files',
+  }
+end, { desc = '[S]earch [/] in Open Files' })
+
+-- Shortcut for searching your Neovim configuration files
+vim.keymap.set('n', '<leader>sc', function()
+  telescope_builtin.find_files { cwd = vim.fn.stdpath 'config' }
+end, { desc = '[S]earch Neovim [C]onfig' })
+
+vim.keymap.set('n', '<leader>sF', function()
+  telescope_builtin.find_files { hidden = true, no_ignore = true }
+end, { desc = '[S]earch All [F]iles' })
+
 -- [[ Snippets ]]
 local luasnip = require 'luasnip'
 local s = luasnip.snippet
@@ -1454,6 +1460,7 @@ local t = luasnip.text_node
 local i = luasnip.insert_node
 local f = luasnip.function_node
 local d = luasnip.dynamic_node
+local r = luasnip.restore_node
 local fmt = require('luasnip.extras.fmt').fmt
 local fmta = require('luasnip.extras.fmt').fmta
 local rep = require('luasnip.extras').rep
@@ -1476,9 +1483,64 @@ local get_visual = function(args, parent)
     return sn(nil, i(1))
   end
 end
--- Example: expanding a snippet on a new line only.
--- In a snippet file, first require the line_begin condition...
---local line_begin = require('luasnip.extras.expand_conditions').line_begin
+
+local function v(pos, default_text)
+  return d(pos, function(args, parent)
+    return get_visual(args, parent, default_text)
+  end)
+end
+
+local in_mathzone = function()
+  return vim.fn['vimtex#syntax#in_mathzone']() == 1
+end
+
+-- Matrices and cases
+-- taken from github.com/evesdropper
+
+local generate_matrix = function(args, snip)
+  local rows = tonumber(snip.captures[2])
+  local cols = tonumber(snip.captures[3])
+  local nodes = {}
+  local ins_indx = 1
+  for j = 1, rows do
+    table.insert(nodes, r(ins_indx, tostring(j) .. 'x1', i(1)))
+    ins_indx = ins_indx + 1
+    for k = 2, cols do
+      table.insert(nodes, t ' & ')
+      table.insert(nodes, r(ins_indx, tostring(j) .. 'x' .. tostring(k), i(1)))
+      ins_indx = ins_indx + 1
+    end
+    table.insert(nodes, t { ' \\\\', '' })
+  end
+  nodes[#nodes] = t ' \\\\'
+  return sn(nil, nodes)
+end
+
+local generate_hom_matrix = function(args, snip)
+  local rows = tonumber(snip.captures[2])
+  local cols = tonumber(snip.captures[3])
+  local nodes = {}
+  local ins_indx = 1
+  for j = 1, rows do
+    if j == 1 then
+      table.insert(nodes, r(ins_indx, i(1)))
+      table.insert(nodes, t '_{11}')
+    else
+      table.insert(nodes, rep(1))
+      table.insert(nodes, t('_{' .. tostring(j) .. '1}'))
+    end
+    ins_indx = ins_indx + 1
+    for k = 2, cols do
+      table.insert(nodes, t ' & ')
+      table.insert(nodes, rep(1))
+      table.insert(nodes, t('_{' .. tostring(j) .. tostring(k) .. '}'))
+      ins_indx = ins_indx + 1
+    end
+    table.insert(nodes, t { ' \\\\', '' })
+  end
+  nodes[#nodes] = t ' \\\\'
+  return sn(nil, nodes)
+end
 
 -- Greek Letters
 local greek_letter_snippets = {
@@ -1537,10 +1599,57 @@ local text_fraction_snippets = {
 }
 
 local math_snippets = {
-  s({ trig = '.ff', snippetType = 'autosnippet', desc = 'Fraction' }, fmta('\\frac{<>}{<>}', { i(1), i(2) })),
-  s({ trig = '.lim', snippetType = 'autosnippet', desc = 'Limit' }, fmta('\\lim_{<> \\to <>}', { i(1), i(2) })),
-  s({ trig = '.din', snippetType = 'autosnippet', desc = 'Definite Integral' }, fmta('\\int_{<>}^{<>}', { i(1), i(2) })),
-  s({ trig = '.ind', snippetType = 'autosnippet', desc = 'Indefinite Integral' }, fmta('\\int ', {})),
+  s({ trig = ',ff', snippetType = 'autosnippet', desc = 'Fraction' }, fmta('\\frac{<>}{<>}', { i(1), i(2) }), { condition = in_mathzone }),
+  s({ trig = ',lim', snippetType = 'autosnippet', desc = 'Limit' }, fmta('\\lim_{<> \\to <>}', { i(1), i(2) }), { condition = in_mathzone }),
+  s({ trig = ',din', snippetType = 'autosnippet', desc = 'Definite Integral' }, fmta('\\int_{<>}^{<>}', { i(1), i(2) }), { condition = in_mathzone }),
+  s({ trig = ',ind', snippetType = 'autosnippet', desc = 'Indefinite Integral' }, fmta('\\int ', {}), { condition = in_mathzone }),
+  s({ trig = ',()', snippetType = 'autosnippet' }, { t '\\left(\\', i(1), t 'right)' }, { condition = in_mathzone }),
+  s({ trig = ',[]', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
+  s({ trig = ',{}', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
+  s(
+    { trig = '([^%s]*),_', regTrig = true, snippetType = 'autosnippet' },
+    { f(return_first_capture), t '_{', d(1, get_visual), t '}' },
+    { condition = in_mathzone }
+  ),
+  s(
+    { trig = '([^%s]*),^', regTrig = true, snippetType = 'autosnippet' },
+    { f(return_first_capture), t '^{', d(1, get_visual), t '}' },
+    { condition = in_mathzone }
+  ),
+  -- Matrices
+  -- stylua: ignore start
+  s({trig = ",m([bBpvV])(%d+)x(%d+)", desc = "New matrix", snippetType = "autosnippet", regTrig = true},
+      {
+      t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
+      t({"",""}), d(1,generate_matrix),
+      t({"",""}), t("\\end{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}")
+      },
+      {condition = in_mathzone}
+  ),
+
+
+  s({trig = ",m([bBpvV])(%d+)h(%d+)", desc = "New homogeneous matrix", snippetType = "autosnippet", regTrig = true},
+      {
+      t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
+      t({"",""}), d(1,generate_hom_matrix),
+      t({"",""}), t("\\end{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}")
+      },
+      {condition = in_mathzone}
+  ),
+
+
+  s({trig = ",m([bBpvV])gn", desc = "New generic matrix", snippetType = "autosnippet", regTrig = true},
+      {
+          t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
+      t({"",""}), t("    "), i(1), t("_{11} & "), rep(1), t("_{12} & \\cdots & "), rep(1), t("_{1"), i(2), t("}"), t(" \\\\"),
+      t({"",""}), t("    "), rep(1), t("_{21} & "), rep(1), t("_{22} & \\cdots & "), rep(1), t("_{2"), rep(2), t("}"), t(" \\\\"),
+      t({"",""}), t("    "), t("\\vdots & \\vdots & \\ddots & \\vdots \\\\"),
+      t({"",""}), t("    "), rep(1), t("_{"), i(3), t("1} & "), rep(1), t("_{"), rep(3), t("2} & \\cdots & "), rep(1), t("_{"), rep(3), rep(2), t("} \\\\"),
+      t({"",""}), t("\\end{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}")
+      },
+      {condition = in_mathzone}
+  ),
+  -- stylua: ignore end
 }
 
 local markdown_snippets = {
@@ -1549,8 +1658,8 @@ local markdown_snippets = {
 }
 
 local tex_snippets = {
-  s({ trig = '([^%s]*)(%s*),df', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°F' }),
-  s({ trig = '([^%s]*)(%s*),dc', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°C' }),
+  s({ trig = '(.*)(%s*),df', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°F' }),
+  s({ trig = '(.*)(%s*),dc', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°C' }),
   s({ trig = ',ts', snippetType = 'autosnippet' }, { t 'Teaspoon' }),
   s({ trig = ',tb', snippetType = 'autosnippet' }, { t 'Tablespoon' }),
   s({ trig = ',cu', snippetType = 'autosnippet' }, { t 'Cup' }),
@@ -1559,6 +1668,15 @@ local tex_snippets = {
     { trig = ',rstep', snippetType = 'autosnippet', desc = 'Adds a step to the recipe' },
     fmta('\\begin{step}\n<>\n\\method\n<>\n\\end{step}\n<>', { i(2), i(1), i(0) })
   ),
+  s({ trig = ';it', snippetType = 'autosnippet', desc = 'Italicize' }, { t '\\textit{', d(1, get_visual), t '}' }),
+  s({ trig = ';bf', snippetType = 'autosnippet', desc = 'Bold' }, { t '\\textbf{', d(1, get_visual), t '}' }),
+  s({ trig = ';ts', snippetType = 'autosnippet', desc = 'TinySize' }, { t '\\tiny{', d(1, get_visual), t '}' }),
+  s({ trig = ';cs', snippetType = 'autosnippet', desc = 'ScriptSize' }, { t '\\scriptsize{', d(1, get_visual), t '}' }),
+  s({ trig = ';fs', snippetType = 'autosnippet', desc = 'FootnoteSize' }, { t '\\footnotsize{', d(1, get_visual), t '}' }),
+  s({ trig = ';ss', snippetType = 'autosnippet', desc = 'SmallSize' }, { t '\\small{', d(1, get_visual), t '}' }),
+  s({ trig = ';ns', snippetType = 'autosnippet', desc = 'NormalSize' }, { t '\\normalsize{', d(1, get_visual), t '}' }),
+  s({ trig = ';mm', snippetType = 'autosnippet', desc = 'Inline Math' }, { t '$', d(1, get_visual), t '$' }),
+  s({ trig = ';dm', snippetType = 'autosnippet', desc = 'Display Math' }, { t '\\[', d(1, get_visual), t '\\]' }),
 }
 
 local global_snippets = {
