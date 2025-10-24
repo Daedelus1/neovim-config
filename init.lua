@@ -116,7 +116,7 @@ function RefreshCmpState()
   require('blink-cmp').setup { cmdline = { enabled = vim.b.completion } }
 end
 
--- [[ Configure and install plugins ]]
+-- [[ Plugins ]]
 --
 --  To check the current status of your plugins, run
 --    :Lazy
@@ -803,6 +803,7 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
       --  Check out: https://github.com/echasnovski/mini.nvim
+      -- require('mini.misc').setup_termbg_sync()
     end,
   },
   { -- Highlight, edit, and navigate code
@@ -883,6 +884,39 @@ require('lazy').setup({
     dependencies = { 'echasnovski/mini.icons' },
     config = function()
       require('alpha').setup(require('alpha.themes.startify').config)
+      local alpha = require 'alpha'
+      local dashboard = require 'alpha.themes.dashboard'
+      dashboard.section.header.val = {
+        '    ▄▄█▀▀▀▀█▄▄                                                                ▄▄█▀▀▀▀█▄▄',
+        '  ▄█▀        ▀█▄                                                            ▄█▀        ▀█▄',
+        '  ▀▀          ▀▀                                                            ▀▀          ▀▀',
+        '        ██                                                                        ██',
+        '       ████                                                                      ████',
+        '      ▄█  █▄                                                                    ▄█  █▄',
+        '     ▄██  ██▄                                                                  ▄██  ██▄',
+        '     ██    ██        ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗        ██    ██',
+        '    ███    ███       ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║       ███    ███',
+        '   ██ █▄  ▄█ ▀█      ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║      ██ █▄  ▄█ ▀█',
+        '  ▄█  ▀█  █▀  █▄     ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║     ▄█  ▀█  █▀  █▄',
+        ' ▄█    ████    █▄    ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║    ▄█    ████    █▄',
+        ' █▀    ▄██▄    ▀█    ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝    █▀    ▄██▄    ▀█',
+        '▀█████▀▀██▀▀█████▀                                                        ▀█████▀▀██▀▀█████▀',
+        '  ▀█▄   ██   ▄█▀                                                            ▀█▄   ██   ▄█▀',
+        '    ▀█▄ ██ ▄█▀                                                                ▀█▄ ██ ▄█▀',
+        '▀█▄   ▀████▀   ▄█▀                                                        ▀█▄   ▀████▀   ▄█▀',
+        '  ▀█▄   ▀▀   ▄█▀                                                            ▀█▄   ▀▀   ▄█▀',
+        '    ▀▀      ▀▀                                                                ▀▀      ▀▀',
+      }
+      dashboard.section.buttons.val = {
+        dashboard.button('n', '  New file', ':ene <BAR> startinsert <CR>'),
+        dashboard.button('f', '󰈞  Find file', ':Telescope find_files <CR>'),
+        dashboard.button('t', '  Find text', ':Telescope live_grep <CR>'),
+        dashboard.button('m', '󰃀  Bookmarks', ':Telescope marks <CR>'),
+        dashboard.button('r', '󱑂  Recently used files', ':Telescope oldfiles <CR>'),
+        dashboard.button('c', '  Configuration', ':e ~/AppData/Local/nvim/init.lua<CR>'),
+        dashboard.button('q', '󰩈  Quit Neovim', ':qa<CR>'),
+      }
+      require('alpha').setup(dashboard.opts)
     end,
   },
   {
@@ -1081,7 +1115,7 @@ require('lazy').setup({
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = 'C:\\Users\\Ethan\\.vscode\\extensions\\ms-vscode.cpptools-1.27.7-win32-x64\\debugAdapters\\bin\\OpenDebugAD7.exe',
+        command = 'C:\\Users\\Ethan\\.vscode\\extensions\\ms-vscode.cpptools-1.28.3-win32-x64\\debugAdapters\\bin\\OpenDebugAD7',
         options = {
           detached = false,
         },
@@ -1311,6 +1345,10 @@ vim.g.clean_code = function()
   vim.cmd(vim.g.clean_code_command)
 end
 
+local open_file_explorer = function()
+  local output = vim.fn.system 'explorer .'
+end
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 vim.keymap.set('n', '<leader>cq', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -1409,6 +1447,8 @@ vim.keymap.set({ 'n' }, '<leader>dd', function()
 end, { desc = 'Debug: Toggle UI.' })
 
 vim.keymap.set({ 'n', 'x', 'o' }, '<leader>st', toggle_neotree, { desc = 'Toggle Neo[t]ree' })
+
+vim.keymap.set({ 'n', 'x', 'o' }, '<leader>se', open_file_explorer, { desc = 'Open File Explorer' })
 
 -- Telescope
 
