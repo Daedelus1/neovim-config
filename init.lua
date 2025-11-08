@@ -1653,9 +1653,9 @@ local math_snippets = {
   s({ trig = ',lim', snippetType = 'autosnippet', desc = 'Limit' }, fmta('\\lim_{<> \\to <>}', { i(1), i(2) }), { condition = in_mathzone }),
   s({ trig = ',din', snippetType = 'autosnippet', desc = 'Definite Integral' }, fmta('\\int_{<>}^{<>}', { i(1), i(2) }), { condition = in_mathzone }),
   s({ trig = ',ind', snippetType = 'autosnippet', desc = 'Indefinite Integral' }, fmta('\\int ', {}), { condition = in_mathzone }),
-  s({ trig = ',(', snippetType = 'autosnippet' }, { t '\\left(\\', i(1), t 'right)' }, { condition = in_mathzone }),
-  s({ trig = ',[', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
-  s({ trig = ',{', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
+  s({ trig = ',()', snippetType = 'autosnippet' }, { t '\\left(\\', i(1), t 'right)' }, { condition = in_mathzone }),
+  s({ trig = ',[]', snippetType = 'autosnippet' }, { t '\\left[\\', i(1), t 'right}' }, { condition = in_mathzone }),
+  s({ trig = ',{}', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
   s({ trig = ',_', snippetType = 'autosnippet' }, { t '_{', d(1, get_visual), t '}' }, { condition = in_mathzone }),
   s({ trig = ',^', snippetType = 'autosnippet' }, { t '^{', d(1, get_visual), t '}' }, { condition = in_mathzone }),
   -- Matrices
