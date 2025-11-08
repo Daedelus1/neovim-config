@@ -682,6 +682,7 @@ require('lazy').setup({
           require('luasnip').config.set_config { -- Setting LuaSnip config
             -- Enable autotriggered snippets
             enable_autosnippets = true,
+            wordTrig = false,
 
             -- Use Tab (or some other key if you prefer) to trigger visual selection
             store_selection_keys = '<Tab>',
@@ -962,7 +963,9 @@ require('lazy').setup({
     opts = { -- Default Range
       stiffness = 0.5, -- 0.6 [0, 1]
       trailing_stiffness = 0.49, -- 0.3 [0, 1]
+      time_interval = 7, --ms
       -- distance_stop_animating = 0.5, -- 0.1 > 0
+      smear_insert_mode = false,
     },
   },
   {
@@ -1214,6 +1217,13 @@ require('lazy').setup({
       end,
     },
   },
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.icons' }, -- if you use standalone mini plugins
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -1461,8 +1471,8 @@ vim.keymap.set('n', '<leader>ss', telescope_builtin.builtin, { desc = '[S]earch 
 vim.keymap.set('n', '<leader>sw', telescope_builtin.grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', telescope_builtin.live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', telescope_builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-vim.keymap.set('n', '<leader>sr', telescope_builtin.resume, { desc = '[S]earch [R]esume' })
-vim.keymap.set('n', '<leader>s.', telescope_builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+--vim.keymap.set('n', '<leader>sr', telescope_builtin.resume, { desc = '[S]earch [R]esume' })
+vim.keymap.set('n', '<leader>sr', telescope_builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 vim.keymap.set('n', '<leader>sb', telescope_builtin.buffers, { desc = '[ ] [S]earch existing [b]uffers' })
 
 -- Slightly advanced example of overriding default behavior and theme
@@ -1584,58 +1594,58 @@ end
 
 -- Greek Letters
 local greek_letter_snippets = {
-  s({ trig = ',al', snippetType = 'autosnippet' }, { t '\\alpha' }),
-  s({ trig = ',be', snippetType = 'autosnippet' }, { t '\\beta' }),
-  s({ trig = ',ga', snippetType = 'autosnippet' }, { t '\\gamma' }),
-  s({ trig = ',de', snippetType = 'autosnippet' }, { t '\\delta' }),
-  s({ trig = ',ep', snippetType = 'autosnippet' }, { t '\\varepsilon' }),
-  s({ trig = ',ze', snippetType = 'autosnippet' }, { t '\\zeta' }),
-  s({ trig = ',et', snippetType = 'autosnippet' }, { t '\\eta' }),
-  s({ trig = ',th', snippetType = 'autosnippet' }, { t '\\theta' }),
-  s({ trig = ',io', snippetType = 'autosnippet' }, { t '\\iota' }),
-  s({ trig = ',ka', snippetType = 'autosnippet' }, { t '\\kappa' }),
-  s({ trig = ',la', snippetType = 'autosnippet' }, { t '\\lambda' }),
-  s({ trig = ',mu', snippetType = 'autosnippet' }, { t '\\mu' }),
-  s({ trig = ',nu', snippetType = 'autosnippet' }, { t '\\nu' }),
-  s({ trig = ',xi', snippetType = 'autosnippet' }, { t '\\xi' }),
-  s({ trig = ',pi', snippetType = 'autosnippet' }, { t '\\pi' }),
-  s({ trig = ',rh', snippetType = 'autosnippet' }, { t '\\rho' }),
-  s({ trig = ',si', snippetType = 'autosnippet' }, { t '\\sigma' }),
-  s({ trig = ',ta', snippetType = 'autosnippet' }, { t '\\tau' }),
-  s({ trig = ',up', snippetType = 'autosnippet' }, { t '\\upsilon' }),
-  s({ trig = ',ph', snippetType = 'autosnippet' }, { t '\\phi' }),
-  s({ trig = ',ch', snippetType = 'autosnippet' }, { t '\\chi' }),
-  s({ trig = ',ps', snippetType = 'autosnippet' }, { t '\\psi' }),
-  s({ trig = ',om', snippetType = 'autosnippet' }, { t '\\omega' }),
-  s({ trig = ',Ga', snippetType = 'autosnippet' }, { t '\\Gamma' }),
-  s({ trig = ',De', snippetType = 'autosnippet' }, { t '\\Delta' }),
-  s({ trig = ',Th', snippetType = 'autosnippet' }, { t '\\Theta' }),
-  s({ trig = ',La', snippetType = 'autosnippet' }, { t '\\Lambda' }),
-  s({ trig = ',Xi', snippetType = 'autosnippet' }, { t '\\Xi' }),
-  s({ trig = ',Pi', snippetType = 'autosnippet' }, { t '\\Pi' }),
-  s({ trig = ',Si', snippetType = 'autosnippet' }, { t '\\Sigma' }),
-  s({ trig = ',Up', snippetType = 'autosnippet' }, { t '\\Upsilon' }),
-  s({ trig = ',Ph', snippetType = 'autosnippet' }, { t '\\Phi' }),
-  s({ trig = ',Ps', snippetType = 'autosnippet' }, { t '\\Psi' }),
-  s({ trig = ',Om', snippetType = 'autosnippet' }, { t '\\Omega' }),
+  s({ trig = ',al', wordTrig = true, snippetType = 'autosnippet' }, { t '\\alpha' }),
+  s({ trig = ',be', wordTrig = true, snippetType = 'autosnippet' }, { t '\\beta' }),
+  s({ trig = ',ga', wordTrig = true, snippetType = 'autosnippet' }, { t '\\gamma' }),
+  s({ trig = ',de', wordTrig = true, snippetType = 'autosnippet' }, { t '\\delta' }),
+  s({ trig = ',ep', wordTrig = true, snippetType = 'autosnippet' }, { t '\\varepsilon' }),
+  s({ trig = ',ze', wordTrig = true, snippetType = 'autosnippet' }, { t '\\zeta' }),
+  s({ trig = ',et', wordTrig = true, snippetType = 'autosnippet' }, { t '\\eta' }),
+  s({ trig = ',th', wordTrig = true, snippetType = 'autosnippet' }, { t '\\theta' }),
+  s({ trig = ',io', wordTrig = true, snippetType = 'autosnippet' }, { t '\\iota' }),
+  s({ trig = ',ka', wordTrig = true, snippetType = 'autosnippet' }, { t '\\kappa' }),
+  s({ trig = ',la', wordTrig = true, snippetType = 'autosnippet' }, { t '\\lambda' }),
+  s({ trig = ',mu', wordTrig = true, snippetType = 'autosnippet' }, { t '\\mu' }),
+  s({ trig = ',nu', wordTrig = true, snippetType = 'autosnippet' }, { t '\\nu' }),
+  s({ trig = ',xi', wordTrig = true, snippetType = 'autosnippet' }, { t '\\xi' }),
+  s({ trig = ',pi', wordTrig = true, snippetType = 'autosnippet' }, { t '\\pi' }),
+  s({ trig = ',rh', wordTrig = true, snippetType = 'autosnippet' }, { t '\\rho' }),
+  s({ trig = ',si', wordTrig = true, snippetType = 'autosnippet' }, { t '\\sigma' }),
+  s({ trig = ',ta', wordTrig = true, snippetType = 'autosnippet' }, { t '\\tau' }),
+  s({ trig = ',up', wordTrig = true, snippetType = 'autosnippet' }, { t '\\upsilon' }),
+  s({ trig = ',ph', wordTrig = true, snippetType = 'autosnippet' }, { t '\\phi' }),
+  s({ trig = ',ch', wordTrig = true, snippetType = 'autosnippet' }, { t '\\chi' }),
+  s({ trig = ',ps', wordTrig = true, snippetType = 'autosnippet' }, { t '\\psi' }),
+  s({ trig = ',om', wordTrig = true, snippetType = 'autosnippet' }, { t '\\omega' }),
+  s({ trig = ',Ga', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Gamma' }),
+  s({ trig = ',De', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Delta' }),
+  s({ trig = ',Th', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Theta' }),
+  s({ trig = ',La', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Lambda' }),
+  s({ trig = ',Xi', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Xi' }),
+  s({ trig = ',Pi', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Pi' }),
+  s({ trig = ',Si', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Sigma' }),
+  s({ trig = ',Up', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Upsilon' }),
+  s({ trig = ',Ph', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Phi' }),
+  s({ trig = ',Ps', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Psi' }),
+  s({ trig = ',Om', wordTrig = true, snippetType = 'autosnippet' }, { t '\\Omega' }),
 }
 
 local text_fraction_snippets = {
-  s({ trig = '(.*),12', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '½' }),
-  s({ trig = '(.*),13', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅓' }),
-  s({ trig = '(.*),23', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅔' }),
-  s({ trig = '(.*),14', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '¼' }),
-  s({ trig = '(.*),34', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '¾' }),
-  s({ trig = '(.*),15', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅕' }),
-  s({ trig = '(.*),25', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅖' }),
-  s({ trig = '(.*),35', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅗' }),
-  s({ trig = '(.*),45', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅘' }),
-  s({ trig = '(.*),16', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅙' }),
-  s({ trig = '(.*),56', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅚' }),
-  s({ trig = '(.*),18', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅛' }),
-  s({ trig = '(.*),38', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅜' }),
-  s({ trig = '(.*),58', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅝' }),
-  s({ trig = '(.*),78', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '⅞' }),
+  s({ trig = ',12', snippetType = 'autosnippet' }, { t '½' }),
+  s({ trig = ',13', snippetType = 'autosnippet' }, { t '⅓' }),
+  s({ trig = ',23', snippetType = 'autosnippet' }, { t '⅔' }),
+  s({ trig = ',14', snippetType = 'autosnippet' }, { t '¼' }),
+  s({ trig = ',34', snippetType = 'autosnippet' }, { t '¾' }),
+  s({ trig = ',15', snippetType = 'autosnippet' }, { t '⅕' }),
+  s({ trig = ',25', snippetType = 'autosnippet' }, { t '⅖' }),
+  s({ trig = ',35', snippetType = 'autosnippet' }, { t '⅗' }),
+  s({ trig = ',45', snippetType = 'autosnippet' }, { t '⅘' }),
+  s({ trig = ',16', snippetType = 'autosnippet' }, { t '⅙' }),
+  s({ trig = ',56', snippetType = 'autosnippet' }, { t '⅚' }),
+  s({ trig = ',18', snippetType = 'autosnippet' }, { t '⅛' }),
+  s({ trig = ',38', snippetType = 'autosnippet' }, { t '⅜' }),
+  s({ trig = ',58', snippetType = 'autosnippet' }, { t '⅝' }),
+  s({ trig = ',78', snippetType = 'autosnippet' }, { t '⅞' }),
 }
 
 local math_snippets = {
@@ -1646,19 +1656,11 @@ local math_snippets = {
   s({ trig = ',()', snippetType = 'autosnippet' }, { t '\\left(\\', i(1), t 'right)' }, { condition = in_mathzone }),
   s({ trig = ',[]', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
   s({ trig = ',{}', snippetType = 'autosnippet' }, { t '\\left{\\', i(1), t 'right}' }, { condition = in_mathzone }),
-  s(
-    { trig = '([^%s]*),_', regTrig = true, snippetType = 'autosnippet' },
-    { f(return_first_capture), t '_{', d(1, get_visual), t '}' },
-    { condition = in_mathzone }
-  ),
-  s(
-    { trig = '([^%s]*),^', regTrig = true, snippetType = 'autosnippet' },
-    { f(return_first_capture), t '^{', d(1, get_visual), t '}' },
-    { condition = in_mathzone }
-  ),
+  s({ trig = ',_', snippetType = 'autosnippet' }, { t '_{', d(1, get_visual), t '}' }, { condition = in_mathzone }),
+  s({ trig = ',^', snippetType = 'autosnippet' }, { t '^{', d(1, get_visual), t '}' }, { condition = in_mathzone }),
   -- Matrices
   -- stylua: ignore start
-  s({trig = ",m([bBpvV])(%d+)x(%d+)", desc = "New matrix", snippetType = "autosnippet", regTrig = true},
+  s({trig = ",m([bBpvV])(%d+)x(%d+)", desc = "New matrix", snippetType = "autosnippet",wordTrig = true,  regTrig = true},
       {
       t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
       t({"",""}), d(1,generate_matrix),
@@ -1668,7 +1670,7 @@ local math_snippets = {
   ),
 
 
-  s({trig = ",m([bBpvV])(%d+)h(%d+)", desc = "New homogeneous matrix", snippetType = "autosnippet", regTrig = true},
+  s({trig = ",m([bBpvV])(%d+)h(%d+)", desc = "New homogeneous matrix", snippetType = "autosnippet",wordTrig = true,  regTrig = true},
       {
       t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
       t({"",""}), d(1,generate_hom_matrix),
@@ -1678,7 +1680,7 @@ local math_snippets = {
   ),
 
 
-  s({trig = ",m([bBpvV])gn", desc = "New generic matrix", snippetType = "autosnippet", regTrig = true},
+  s({trig = ",m([bBpvV])gn", desc = "New generic matrix", snippetType = "autosnippet",wordTrig = true,  regTrig = true},
       {
           t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
       t({"",""}), t("    "), i(1), t("_{11} & "), rep(1), t("_{12} & \\cdots & "), rep(1), t("_{1"), i(2), t("}"), t(" \\\\"),
@@ -1698,12 +1700,12 @@ local markdown_snippets = {
 }
 
 local tex_snippets = {
-  s({ trig = '(.*)(%s*),df', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°F' }),
-  s({ trig = '(.*)(%s*),dc', regTrig = true, snippetType = 'autosnippet' }, { f(return_first_capture), t '°C' }),
-  s({ trig = ',ts', snippetType = 'autosnippet' }, { t 'Teaspoon' }),
-  s({ trig = ',tb', snippetType = 'autosnippet' }, { t 'Tablespoon' }),
-  s({ trig = ',cu', snippetType = 'autosnippet' }, { t 'Cup' }),
-  s({ trig = ',oz', snippetType = 'autosnippet' }, { t 'Ounce' }),
+  s({ trig = ',df', snippetType = 'autosnippet' }, { t '°F' }),
+  s({ trig = ',dc', snippetType = 'autosnippet' }, { t '°C' }),
+  s({ trig = ',ts', wordTrig = true, snippetType = 'autosnippet' }, { t 'Teaspoon' }),
+  s({ trig = ',tb', wordTrig = true, snippetType = 'autosnippet' }, { t 'Tablespoon' }),
+  s({ trig = ',cu', wordTrig = true, snippetType = 'autosnippet' }, { t 'Cup' }),
+  s({ trig = ',oz', wordTrig = true, snippetType = 'autosnippet' }, { t 'Ounce' }),
   s(
     { trig = ',rstep', snippetType = 'autosnippet', desc = 'Adds a step to the recipe' },
     fmta('\\begin{step}\n<>\n\\method\n<>\n\\end{step}\n<>', { i(2), i(1), i(0) })
@@ -1717,6 +1719,8 @@ local tex_snippets = {
   s({ trig = ';ns', snippetType = 'autosnippet', desc = 'NormalSize' }, { t '\\normalsize{', d(1, get_visual), t '}' }),
   s({ trig = ';mm', snippetType = 'autosnippet', desc = 'Inline Math' }, { t '$', d(1, get_visual), t '$' }),
   s({ trig = ';dm', snippetType = 'autosnippet', desc = 'Display Math' }, { t '\\[', d(1, get_visual), t '\\]' }),
+
+  s({ trig = ',ci', snippetType = 'autosnippet' }, fmta('\\autocite[<>]{<>}<>', { i(2), i(1), i(0) })),
 }
 
 local global_snippets = {
@@ -1740,6 +1744,7 @@ luasnip.add_snippets('markdown', greek_letter_snippets)
 luasnip.add_snippets('markdown', text_fraction_snippets)
 luasnip.add_snippets('markdown', math_snippets)
 luasnip.add_snippets('markdown', markdown_snippets)
+luasnip.add_snippets('tex', text_fraction_snippets)
 luasnip.add_snippets('tex', greek_letter_snippets)
 luasnip.add_snippets('tex', math_snippets)
 luasnip.add_snippets('tex', tex_snippets)
