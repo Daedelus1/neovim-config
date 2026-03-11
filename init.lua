@@ -37,8 +37,6 @@ vim.o.confirm = true
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 
--- [[ Basic Keymaps ]]
-
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -228,7 +226,7 @@ require('lazy').setup({
       -- Document existing key chains
       spec = {
         { '<leader>c', group = '[C]ode' },
-        { '<leader>l', group = 'V[l]mTeX' },
+        { '<leader>l', group = '[L]aTeX' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
@@ -315,18 +313,6 @@ require('lazy').setup({
   },
 
   -- LSP Plugins
-  {
-    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
-    -- used for completion, annotations and signatures of Neovim apis
-    'folke/lazydev.nvim',
-    ft = 'lua',
-    opts = {
-      library = {
-        -- Load luvit types when the `vim.uv` word is found
-        { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
-      },
-    },
-  },
   {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
@@ -417,7 +403,7 @@ require('lazy').setup({
           --  To jump back, press <C-t>.
           map('<leader>cd', require('telescope.builtin').lsp_definitions, 'Goto [D]efinition')
 
-          -- WARN: This is not Goto Definition, this is Goto Declaration.
+          -- This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
           map('<leader>cD', vim.lsp.buf.declaration, 'Goto [D]eclaration')
 
@@ -997,6 +983,42 @@ require('lazy').setup({
     },
   },
   {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    opts = {},
+  },
+  {
+    'lewis6991/gitsigns.nvim',
+    opts = {
+      on_attach = function(bufnr)
+        GitsignsKeymap(bufnr)
+      end,
+    },
+  },
+  {
+    'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v3.x',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      'nvim-tree/nvim-web-devicons', -- optional, but recommended
+    },
+    lazy = false, -- neo-tree will lazily load itself
+  },
+  {
+    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
+    -- used for completion, annotations and signatures of Neovim apis
+    'folke/lazydev.nvim',
+    ft = 'lua',
+    opts = {
+      library = {
+        -- Load luvit types when the `vim.uv` word is found
+        { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+      },
+    },
+  },
+  {
+    -- Used for Rust Development
     'mrcjkb/rustaceanvim',
     version = '^6', -- Recommended
     lazy = false, -- This plugin is already lazy
@@ -1011,25 +1033,6 @@ require('lazy').setup({
       }
     end,
   },
-  {
-    'nvim-neo-tree/neo-tree.nvim',
-    branch = 'v3.x',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      'nvim-tree/nvim-web-devicons', -- optional, but recommended
-    },
-    lazy = false, -- neo-tree will lazily load itself
-  },
-  -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
-  -- init.lua. If you want these files, they are in the repository, so you can just download them and
-  -- place them in the correct locations.
-
-  -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
   {
     -- NOTE: Yes, you can install new plugins here!
     'mfussenegger/nvim-dap',
@@ -1203,19 +1206,6 @@ require('lazy').setup({
         end,
       })
     end,
-  },
-  {
-    'windwp/nvim-autopairs',
-    event = 'InsertEnter',
-    opts = {},
-  },
-  {
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      on_attach = function(bufnr)
-        GitsignsKeymap(bufnr)
-      end,
-    },
   },
   {
     'MeanderingProgrammer/render-markdown.nvim',
@@ -1669,7 +1659,6 @@ local math_snippets = {
       {condition = in_mathzone}
   ),
 
-
   s({trig = ",m([bBpvV])(%d+)h(%d+)", desc = "New homogeneous matrix", snippetType = "autosnippet",wordTrig = true,  regTrig = true},
       {
       t("\\begin{"), f(function(_, snip) return snip.captures[1] .. "matrix" end), t("}"),
@@ -1678,7 +1667,6 @@ local math_snippets = {
       },
       {condition = in_mathzone}
   ),
-
 
   s({trig = ",m([bBpvV])gn", desc = "New generic matrix", snippetType = "autosnippet",wordTrig = true,  regTrig = true},
       {
@@ -1707,21 +1695,29 @@ local tex_snippets = {
   s({ trig = ',cu', wordTrig = true, snippetType = 'autosnippet' }, { t 'Cup' }),
   s({ trig = ',oz', wordTrig = true, snippetType = 'autosnippet' }, { t 'Ounce' }),
   s(
-    { trig = ',rstep', snippetType = 'autosnippet', desc = 'Adds a step to the recipe' },
+    { trig = ';rstep', snippetType = 'autosnippet', desc = 'Adds a step to the recipe' },
     fmta('\\begin{step}\n<>\n\\method\n<>\n\\end{step}\n<>', { i(2), i(1), i(0) })
   ),
-  s({ trig = ';it', snippetType = 'autosnippet', desc = 'Italicize' }, { t '\\textit{', d(1, get_visual), t '}' }),
-  s({ trig = ';bf', snippetType = 'autosnippet', desc = 'Bold' }, { t '\\textbf{', d(1, get_visual), t '}' }),
-  s({ trig = ';ts', snippetType = 'autosnippet', desc = 'TinySize' }, { t '\\tiny{', d(1, get_visual), t '}' }),
-  s({ trig = ';cs', snippetType = 'autosnippet', desc = 'ScriptSize' }, { t '\\scriptsize{', d(1, get_visual), t '}' }),
-  s({ trig = ';fs', snippetType = 'autosnippet', desc = 'FootnoteSize' }, { t '\\footnotsize{', d(1, get_visual), t '}' }),
-  s({ trig = ';ss', snippetType = 'autosnippet', desc = 'SmallSize' }, { t '\\small{', d(1, get_visual), t '}' }),
-  s({ trig = ';ns', snippetType = 'autosnippet', desc = 'NormalSize' }, { t '\\normalsize{', d(1, get_visual), t '}' }),
-  s({ trig = ';mm', snippetType = 'autosnippet', desc = 'Inline Math' }, { t '$', d(1, get_visual), t '$' }),
-  s({ trig = ';dm', snippetType = 'autosnippet', desc = 'Display Math' }, { t '\\[', d(1, get_visual), t '\\]' }),
-
+  s({ trig = ',it', snippetType = 'autosnippet', desc = 'Italicize' }, { t '\\textit{', d(1, get_visual), t '}' }),
+  s({ trig = ',bf', snippetType = 'autosnippet', desc = 'Bold' }, { t '\\textbf{', d(1, get_visual), t '}' }),
+  s({ trig = ',ts', snippetType = 'autosnippet', desc = 'TinySize' }, { t '\\tiny{', d(1, get_visual), t '}' }),
+  s({ trig = ',cs', snippetType = 'autosnippet', desc = 'ScriptSize' }, { t '\\scriptsize{', d(1, get_visual), t '}' }),
+  s({ trig = ',fs', snippetType = 'autosnippet', desc = 'FootnoteSize' }, { t '\\footnotsize{', d(1, get_visual), t '}' }),
+  s({ trig = ',ss', snippetType = 'autosnippet', desc = 'SmallSize' }, { t '\\small{', d(1, get_visual), t '}' }),
+  s({ trig = ',ns', snippetType = 'autosnippet', desc = 'NormalSize' }, { t '\\normalsize{', d(1, get_visual), t '}' }),
+  s({ trig = ',mm', snippetType = 'autosnippet', desc = 'Inline Math' }, { t '$', d(1, get_visual), t '$' }),
+  s({ trig = ',dm', snippetType = 'autosnippet', desc = 'Display Math' }, { t '\\[', d(1, get_visual), t '\\]' }),
+  s({ trig = ';beq', snippetType = 'autosnippet', desc = 'Equation Environment' }, { t '\\begin{equation}\n', d(1, get_visual), t '\\end{equation}' }),
+  s({ trig = ';bseq', snippetType = 'autosnippet', desc = 'Equation* Environment' }, { t '\\begin{equation*}\n', d(1, get_visual), t '\\end{equation*}' }),
+  s({ trig = ';bal', snippetType = 'autosnippet', desc = 'Align Environment' }, { t '\\begin{align}\n', d(1, get_visual), t '\\end{align}' }),
+  s({ trig = ';bsal', snippetType = 'autosnippet', desc = 'Align* Environment' }, { t '\\begin{align*}\n', d(1, get_visual), t '\\end{align*}' }),
+  s(
+    { trig = ';bfig', snippetType = 'autosnippet', desc = 'Figure' },
+    fmta('\\begin{figure}[<>]\n\t\\centering\n\t\\caption{<>}\\label{<>}\n\\end{figure}<>', { i(2), i(3), i(1), i(0) })
+  ),
   s({ trig = ',ci', snippetType = 'autosnippet' }, fmta('\\autocite[<>]{<>}<>', { i(2), i(1), i(0) })),
 }
+-- \\begin{figure}[${1:htbp}]\n\t\\centering\n\t${0:${TM_SELECTED_TEXT}}\n\t\\caption{${2:<caption>}}\\label{${3:<label>}}\n\\end{figure}
 
 local global_snippets = {
   s(
