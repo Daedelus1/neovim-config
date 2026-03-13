@@ -910,10 +910,15 @@ require('lazy').setup({
     'lervag/vimtex',
     lazy = false,
     config = function()
-      --vim.g.vimtex_view_method = 'general' -- or 'sumatrapdf'
-      vim.g.vimtex_view_general_viewer = 'SumatraPDF'
-      vim.g.vimtex_view_general_options = '-reuse-instance -bg-color 0xffffff -forward-search @tex @line @pdf'
-      -- vim.g.vimtex_compiler_progname = 'nvr'
+      
+      if vim.fn.has 'win32' == 1 then
+        --vim.g.vimtex_view_method = 'general' -- or 'sumatrapdf'
+        vim.g.vimtex_view_general_viewer = 'SumatraPDF'
+        vim.g.vimtex_view_general_options = '-reuse-instance -bg-color 0xffffff -forward-search @tex @line @pdf'
+        -- vim.g.vimtex_compiler_progname = 'nvr'
+      else 
+        vim.g.vimtex_view_method = 'zathura'
+      end
       vim.g.vimtex_compiler_latexmk = {
         options = {
           '-pdf',

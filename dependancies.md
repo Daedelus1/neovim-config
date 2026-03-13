@@ -1,10 +1,16 @@
 # Dependencies
-- Curl
-- Git
-- RipGrep
-- Make
-- NodeJS
-- GCC
-- SumatraPDF
-- LaTeXMK
-
+- cargo
+- rustc
+- rustfmt
+- clippy
+- rust-analyzer
+- alejandra
+- python315
+- gcc
+- nodejs_24
+- ripgrep
+- texliveFull
+- texlab
+- ltex-ls
+- neovim
+- zathura
