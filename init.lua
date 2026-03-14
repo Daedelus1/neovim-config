@@ -87,11 +87,11 @@ if vim.fn.has 'win32' == 1 then
       error('Error cloning lazy.nvim:\n' .. out)
     end
   end
-end
 
----@type vim.Option
-local rtp = vim.opt.rtp
-rtp:prepend(lazypath)
+  ---@type vim.Option
+  local rtp = vim.opt.rtp
+  rtp:prepend(lazypath)
+end
 
 -- setup for battery.nvim
 local nvimbattery = {
