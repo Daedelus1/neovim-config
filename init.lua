@@ -4,6 +4,9 @@ vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set
 vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
 vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
 vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
+vim.g.codelldb_path = vim.fn.system(
+  "echo /nix/store/$(ls /nix/store/ | grep -P \"vscode-extension-vadimcn-vscode-lldb-[0-9\\.]*(/|\\z)\")/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb")
+
 -- [[Options]]
 vim.g.mapleader = ' '       -- Set <space> as the leader key
 vim.g.maplocalleader = ' '
@@ -36,6 +39,8 @@ vim.o.confirm = true
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 
+
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -62,9 +67,9 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
     elseif ft == 'c' or 'ft' == 'cpp' then
       -- require('fidget').notify 'Set code configuration to Rust'
-      vim.g.run_code_command = 'CMakeRun'
+      vim.g.run_code_command = 'CMakeQuickRun'
       vim.g.test_code_command = 'CMakeTest'
-      vim.g.build_code_command = 'CMakeBuild'
+      vim.g.build_code_command = 'CMakeQuickBuild'
       vim.g.clean_code_command = 'CMakeClean'
     else
       -- require('fidget').notify 'Code configuration Reset!'
@@ -99,6 +104,27 @@ local nvimbattery = {
     return require('battery').get_status_line()
   end,
 }
+
+local function telescope_pick(opts)
+  local co = coroutine.running()
+  local defaults = {
+    attach_mappings = function(prompt_bufnr, map)
+      local actions = require("telescope.actions")
+      local state   = require("telescope.actions.state")
+      actions.select_default:replace(function()
+        actions.close(prompt_bufnr)
+        coroutine.resume(co, (state.get_selected_entry() or {})[1])
+      end)
+      map("i", "<C-c>", function()
+        actions.close(prompt_bufnr)
+        coroutine.resume(co, nil)
+      end)
+      return true
+    end,
+  }
+  require("telescope.builtin").find_files(vim.tbl_extend("force", defaults, opts or {}))
+  return coroutine.yield()
+end
 
 -- Evaluates whether or not suggestions should be enabled or not, and sets it accordingly
 function RefreshCmpState()
@@ -1173,11 +1199,23 @@ require('cmake-tools').setup {
   cmake_build_directory = 'build',
 }
 
+
+-- Colorscheme
+
+if vim.fn.has 'win32' == 1 then
+  require('everforest').setup {
+    background = 'hard',
+  }
+end
+-- Load the colorscheme here.
+-- Like many other themes, this one has different styles, and you could load
+-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+vim.cmd.colorscheme 'everforest'
+
 -- nvim-dap
 
 local dap = require 'dap'
 local dapui = require 'dapui'
-
 
 if vim.fn.has 'win32' == 1 then
   require('mason-nvim-dap').setup {
@@ -1198,18 +1236,6 @@ if vim.fn.has 'win32' == 1 then
   }
 end
 
--- Colorscheme
-
-if vim.fn.has 'win32' == 1 then
-  require('everforest').setup {
-    background = 'hard',
-  }
-end
-
--- Load the colorscheme here.
--- Like many other themes, this one has different styles, and you could load
--- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-vim.cmd.colorscheme 'everforest'
 
 -- Dap UI setup
 -- For more information, see |:help nvim-dap-ui|
@@ -1249,46 +1275,66 @@ dap.listeners.after.event_initialized['dapui_config'] = dapui.open
 dap.listeners.before.event_terminated['dapui_config'] = dapui.close
 dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
--- Install golang specific config
-require('dap-go').setup {
-  delve = {
-    -- On Windows delve must be run attached or it crashes.
-    -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-    detached = vim.fn.has 'win32' == 0,
-  },
+local dap = require("dap")
+
+-- Find the lldb-dap binary (NixOS puts it in the store)
+local lldb_dap = vim.fn.exepath("lldb-dap")
+
+-- Adapter definition
+dap.adapters.lldb = {
+  type = "executable",
+  command = lldb_dap,
+  name = "lldb",
+  enrich_config = function(config, on_config)
+    config.stopOnEntry = false
+    if pending_args then
+      config.args = pending_args
+      pending_args = nil
+    end
+    on_config(config)
+  end,
 }
-dap.adapters.cppdbg = {
-  id = 'cppdbg',
-  type = 'executable',
-  command =
-  'C:\\Users\\Ethan\\.vscode\\extensions\\ms-vscode.cpptools-1.28.3-win32-x64\\debugAdapters\\bin\\OpenDebugAD7',
-  options = {
-    detached = false,
-  },
-}
-dap.configurations.cpp = {
+
+-- C / C++ / Rust configurations
+local lldb_config = {
   {
-    name = 'Launch file',
-    type = 'cppdbg',
-    request = 'launch',
+    name = "Launch binary",
+    type = "lldb",
+    request = "launch",
     program = function()
-      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+      pending_stdin = nil
+      return telescope_pick({ prompt_title = "Binary (Ctrl-c to cancel)", find_command = { "find", vim.fn.getcwd(), "-type", "f", "-perm", "/111" } })
     end,
-    cwd = '${workspaceFolder}',
-    stopAtEntry = true,
-    setupCommands = {
-      {
-        text = '-enable-pretty-printing',
-        description = 'enable pretty printing',
-        ignoreFailures = false,
-      },
-    },
+    cwd = "${workspaceFolder}",
+    stopOnEntry = false,
+    args = {},
+  },
+  {
+    name = "Launch binary with input",
+    type = "lldb",
+    request = "launch",
+    program = function()
+      local binary = telescope_pick({ prompt_title = "Binary", find_command = { "find", vim.fn.getcwd(), "-type", "f", "-perm", "/111" } })
+      local stdin  = telescope_pick({ prompt_title = "Stdin", find_command = { "find", vim.fn.getcwd(), "-type", "f", "-name", "*.txt" } })
+      pending_args = { "-c", "exec " .. binary .. " < " .. stdin }
+      return "/bin/sh"
+    end,
+    cwd = "${workspaceFolder}",
+    stopOnEntry = false,
+    args = {},
+  },
+  {
+    name = "Attach to process",
+    type = "lldb",
+    request = "attach",
+    pid = require("dap.utils").pick_process,
+    args = {},
   },
 }
 
-dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
-
+dap.configurations.c = lldb_config
+dap.configurations.cpp = lldb_config
+dap.configurations.rust = lldb_config
 -- Linting
 
 local lint = require 'lint'
@@ -1498,7 +1544,13 @@ vim.keymap.set({ 'n' }, '<leader>db', function()
 end, { desc = 'Debug: Toggle [B]reakpoint' })
 vim.keymap.set({ 'n' }, '<leader>dc', function()
   require('dap').run_to_cursor()
-end, { desc = 'Debug: Run to [C]ursor' })
+end, { desc = 'Debug: Run to [c]ursor' })
+vim.keymap.set({ 'n' }, '<leader>dp', function()
+  require('dap').pause()
+end, { desc = 'Debug: [P]ause' })
+vim.keymap.set({ 'n' }, '<leader>dC', function()
+  require('dap').close()
+end, { desc = 'Debug: [C]lose' })
 
 vim.keymap.set('n', '<leader>cm', function()
   vim.cmd 'Mason'
