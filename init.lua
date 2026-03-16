@@ -1021,6 +1021,9 @@ require('mini.ai').setup { n_lines = 500 }
 -- - sd'   - [S]urround [D]elete [']quotes
 -- - sr)'  - [S]urround [R]eplace [)] [']
 require('mini.surround').setup()
+
+
+require('mini.pairs').setup()
 --  Check out: https://github.com/echasnovski/mini.nvim
 -- require('mini.misc').setup_termbg_sync()
 
