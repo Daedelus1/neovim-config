@@ -54,6 +54,7 @@
           todo-comments-nvim
           vimtex
           which-key-nvim
+          ltex_extra-nvim
         ];
         extraPackages = with pkgs; [
           nil

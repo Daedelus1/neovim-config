@@ -41,7 +41,6 @@ vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 
 
-
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -61,24 +60,25 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     local ft = vim.bo[args.buf].filetype
     -- require('fidget').notify('Filetype is ' .. ft)
     if ft == 'rust' then
-      -- require('fidget').notify 'Set code configuration to CMake'
       vim.g.run_code_command = 'RustLsp runnables'
       vim.g.test_code_command = 'RustLsp testables'
       vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
       vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
     elseif ft == 'c' or 'ft' == 'cpp' then
-      -- require('fidget').notify 'Set code configuration to Rust'
       vim.g.run_code_command = 'CMakeQuickRun'
       vim.g.test_code_command = 'CMakeTest'
       vim.g.build_code_command = 'CMakeQuickBuild'
       vim.g.clean_code_command = 'CMakeClean'
-    else
-      -- require('fidget').notify 'Code configuration Reset!'
-      vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
-      vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
-      vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
-      vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
+    elseif ft == 'tex' then
+      vim.diagnostic.config({
+        update_in_insert = false, -- don't update while typing
+        virtual_text = true,
+      })
     end
+    vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
+    vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
+    vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
+    vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
   end,
 })
 
@@ -251,9 +251,9 @@ if vim.fn.has 'win32' == 1 then
     -- Then, because we use the `opts` key (recommended), the configuration runs
     -- after the plugin has been loaded as `require(MODULE).setup(opts)`.
 
-    {                           -- Useful plugin to show you pending keybinds.
+    {                     -- Useful plugin to show you pending keybinds.
       'folke/which-key.nvim',
-      event = 'VimEnter',       -- Sets the loading event to 'VimEnter'
+      event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     },
 
     -- NOTE: Plugins can specify dependencies.
@@ -263,12 +263,12 @@ if vim.fn.has 'win32' == 1 then
     --
     -- Use the `dependencies` key to specify the dependencies of a particular plugin
 
-    {     -- Fuzzy Finder (files, lsp, etc)
+    { -- Fuzzy Finder (files, lsp, etc)
       'nvim-telescope/telescope.nvim',
       event = 'VimEnter',
       dependencies = {
         'nvim-lua/plenary.nvim',
-        {         -- If encountering errors, see telescope-fzf-native README for installation instructions
+        { -- If encountering errors, see telescope-fzf-native README for installation instructions
           'nvim-telescope/telescope-fzf-native.nvim',
 
           -- `build` is used to run some command when the plugin is installed/updated.
@@ -314,7 +314,7 @@ if vim.fn.has 'win32' == 1 then
       config = funcnd,
     },
 
-    {     -- Autoformat
+    { -- Autoformat
       'stevearc/conform.nvim',
       event = { 'BufWritePre' },
       cmd = { 'ConformInfo' },
@@ -332,28 +332,28 @@ if vim.fn.has 'win32' == 1 then
         return 'make install_jsregexp'
       end)(),
     },
-    {     -- Autocompletion
+    { -- Autocompletion
       'saghen/blink.cmp',
       event = 'VimEnter',
       version = '1.*',
     },
 
-    {     -- You can easily change to a ifferent colorscheme.
+    { -- You can easily change to a ifferent colorscheme.
       -- Change the name of the colorscheme plugin below, and then
       -- change the command in the config to whatever the name of that colorscheme is.
       --
       -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
       'neanias/everforest-nvim',
-      priority = 1000,       -- Make sure to load this before all the other start plugins.
+      priority = 1000, -- Make sure to load this before all the other start plugins.
     },
 
     -- Highlight todo, notes, etc in comments
     { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, },
     'echasnovski/mini.nvim',
-    {     -- Highlight, edit, and navigate code
+    { -- Highlight, edit, and navigate code
       'nvim-treesitter/nvim-treesitter',
       build = ':TSUpdate',
-      main = 'nvim-treesitter.config',       -- Sets main module to use for opts
+      main = 'nvim-treesitter.config', -- Sets main module to use for opts
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
       -- There are additional nvim-treesitter modules that you can use to interact
       -- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -394,7 +394,7 @@ if vim.fn.has 'win32' == 1 then
           'justinhj/battery.nvim',
           opts = {
             show_status_when_no_battery = false,
-            show_plugged_icon = false,             -- If true show a cable icon alongside the battery icon when plugged in
+            show_plugged_icon = false, -- If true show a cable icon alongside the battery icon when plugged in
             show_unplugged_icon = false,
           },
         },
@@ -413,9 +413,9 @@ if vim.fn.has 'win32' == 1 then
       dependencies = {
         'nvim-lua/plenary.nvim',
         'MunifTanjim/nui.nvim',
-        'nvim-tree/nvim-web-devicons',         -- optional, but recommended
+        'nvim-tree/nvim-web-devicons', -- optional, but recommended
       },
-      lazy = false,                            -- neo-tree will lazily load itself
+      lazy = false,                    -- neo-tree will lazily load itself
     },
     {
       -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -426,8 +426,8 @@ if vim.fn.has 'win32' == 1 then
     {
       -- Used for Rust Development
       'mrcjkb/rustaceanvim',
-      version = '^6',       -- Recommended
-      lazy = false,         -- This plugin is already lazy
+      version = '^6', -- Recommended
+      lazy = false,   -- This plugin is already lazy
     },
     {
       'Civitasv/cmake-tools.nvim',
@@ -453,13 +453,13 @@ if vim.fn.has 'win32' == 1 then
       },
       config = funnd,
     },
-    {     -- Linting
+    { -- Linting
       'mfussenegger/nvim-lint',
       event = { 'BufReadPre', 'BufNewFile' },
     },
     {
       'MeanderingProgrammer/render-markdown.nvim',
-      dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.icons' },       -- if you use standalone mini plugins
+      dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.icons' }, -- if you use standalone mini plugins
       ---@module 'render-markdown'
       ---@type render.md.UserConfig
     },
@@ -629,6 +629,21 @@ require("lspconfig").nil_ls.setup({
 require("lspconfig").rust_analyzer.setup({
   ft = "rs"
 })
+
+require("lspconfig").ltex.setup({
+  ft = "tex",
+  on_attach = function(client, bufnr)
+    require("ltex_extra").setup({
+      path = vim.fn.expand("~") .. "/.local/state/nvim/ltex"
+    })
+  end,
+  settings = {
+    ltex = {
+      checkFrequency = "save"
+    }
+  }
+})
+
 
 
 -- Brief aside: **What is LSP?**
@@ -833,7 +848,7 @@ local servers = {
       Lua = {
         runtime = {
           version = "LuaJIT",
-          pathStrict = false,           -- This is where magic happens
+          pathStrict = false, -- This is where magic happens
         },
         completion = {
           callSnippet = 'Replace',
@@ -860,14 +875,14 @@ local servers = {
 -- for you, so that they are available from within Neovim.
 local ensure_installed = vim.tbl_keys(servers or {})
 vim.list_extend(ensure_installed, {
-  'stylua',   -- Used to format Lua code
+  'stylua', -- Used to format Lua code
 })
 
 if vim.fn.has 'win32' == 1 then
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
   require('mason-lspconfig').setup {
-    ensure_installed = {},     -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+    ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
     automatic_installation = false,
     handlers = {
       function(server_name)
@@ -1073,11 +1088,11 @@ require('noice').setup({
   },
   -- you can enable a preset for easier configuration
   presets = {
-    bottom_search = true,             -- use a classic bottom cmdline for search
-    command_palette = true,           -- position the cmdline and popupmenu together
-    long_message_to_split = true,     -- long messages will be sent to a split
-    inc_rename = false,               -- enables an input dialog for inc-rename.nvim
-    lsp_doc_border = true,            -- add a border to hover docs and signature help
+    bottom_search = true,         -- use a classic bottom cmdline for search
+    command_palette = true,       -- position the cmdline and popupmenu together
+    long_message_to_split = true, -- long messages will be sent to a split
+    inc_rename = false,           -- enables an input dialog for inc-rename.nvim
+    lsp_doc_border = true,        -- add a border to hover docs and signature help
   },
 })
 
@@ -1164,9 +1179,9 @@ vim.opt.concealcursor = 'nv'
 
 require('smear_cursor').setup({
   -- Default Range
-  stiffness = 0.5,             -- 0.6 [0, 1]
-  trailing_stiffness = 0.49,   -- 0.3 [0, 1]
-  time_interval = 7,           --ms
+  stiffness = 0.5,           -- 0.6 [0, 1]
+  trailing_stiffness = 0.49, -- 0.3 [0, 1]
+  time_interval = 7,         --ms
   -- distance_stop_animating = 0.5, -- 0.1 > 0
   smear_insert_mode = false,
 })
@@ -1395,6 +1410,28 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
   end,
 })
 
+-- Fidget
+
+require("fidget").setup({
+  progress = {
+    display = {
+      overrides = {
+        ltex = { ignore = true }
+      }
+    }
+  }
+})
+--
+-- After fidget is set up, wrap its $/progress handler
+local original_handler = vim.lsp.handlers["$/progress"]
+vim.lsp.handlers["$/progress"] = function(err, result, ctx, config)
+  local client = vim.lsp.get_client_by_id(ctx.client_id)
+  if client and client.name == "ltex" then
+    return -- drop it before fidget ever sees it
+  end
+  original_handler(err, result, ctx, config)
+end
+
 -- [[Keymap]]
 
 local toggle_mouse = function()
@@ -1431,11 +1468,11 @@ local toggle_neotree = function()
     end
   end
   require('neo-tree.command').execute {
-    action = 'focus',              -- OPTIONAL, this is the default value
-    source = 'filesystem',         -- OPTIONAL, this is the default value
-    position = 'left',             -- OPTIONAL, this is the default value
-    reveal_file = reveal_file,     -- path to file or folder to reveal
-    reveal_force_cwd = true,       -- change cwd without asking if needed
+    action = 'focus',          -- OPTIONAL, this is the default value
+    source = 'filesystem',     -- OPTIONAL, this is the default value
+    position = 'left',         -- OPTIONAL, this is the default value
+    reveal_file = reveal_file, -- path to file or folder to reveal
+    reveal_force_cwd = true,   -- change cwd without asking if needed
     toggle = true,
   }
 end
@@ -1638,7 +1675,7 @@ end
 local get_visual = function(args, parent)
   if #parent.snippet.env.LS_SELECT_RAW > 0 then
     return sn(nil, i(1, parent.snippet.env.LS_SELECT_RAW))
-  else   -- If LS_SELECT_RAW is empty, return a blank insert node
+  else -- If LS_SELECT_RAW is empty, return a blank insert node
     return sn(nil, i(1))
   end
 end
