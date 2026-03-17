@@ -6,20 +6,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-
   outputs = {
     self,
     nixpkgs,
     home-manager,
-  }: {
-    # The HM module — imported by NixOS or standalone HM
+  }: let
+    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+  in {
     homeManagerModules.default = {pkgs, ...}: {
       programs.neovim = {
         enable = true;
         plugins = with pkgs.vimPlugins; [
           luasnip
           alpha-nvim
-          # battery.nvim
           blink-cmp
           cmake-tools-nvim
           conform-nvim
@@ -55,9 +54,7 @@
           todo-comments-nvim
           vimtex
           which-key-nvim
-          cmake-tools-nvim
         ];
-
         extraPackages = with pkgs; [
           nil
           clang-tools
@@ -65,12 +62,10 @@
           texlab
           ltex-ls
           glibc
-          gdb
           lldb
           nodejs_24
           alejandra
           ripgrep
-          # ... all your LSP servers
         ];
       };
       home.packages = with pkgs; [
@@ -82,13 +77,16 @@
         python315
         gcc
         cmake
+        texliveFull
+        mupdf
+        xdotool
       ];
-      xdg.configFile."nvim".source = ./.; # the repo itself is the config
+      programs.zathura.enable = true;
+      xdg.configFile."nvim".source = ./.;
     };
 
-    # For standalone non-NixOS users
     homeConfigurations."ethans" = home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      inherit pkgs; # reuse the pkgs from let block
       modules = [
         self.homeManagerModules.default
         {
@@ -98,6 +96,21 @@
           programs.home-manager.enable = true;
         }
       ];
+    };
+
+    devShells.x86_64-linux.default = pkgs.mkShell {
+      packages = with pkgs; [
+        pkgs.home-manager
+        lua-language-server
+        nil
+        clang-tools
+        rust-analyzer
+      ];
+      shellHook = ''
+        export NVIM_NIX=1
+        echo "Reloading Home Manager..."
+        home-manager switch --flake .#ethans
+      '';
     };
   };
 }
