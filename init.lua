@@ -7,6 +7,7 @@ vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration
 vim.g.codelldb_path = vim.fn.system(
   "echo /nix/store/$(ls /nix/store/ | grep -P \"vscode-extension-vadimcn-vscode-lldb-[0-9\\.]*(/|\\z)\")/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb")
 vim.g.vim_window_id = vim.fn.system("xdotool getactivewindow")
+vim.g.vimtex_word_count_status_line_cache = ''
 
 -- [[Options]]
 vim.g.mapleader = ' '       -- Set <space> as the leader key
@@ -79,6 +80,9 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
     vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
     vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
+    if ft ~= 'tex' then
+      vim.g.vimtex_word_count_status_line_cache = ''
+    end
   end,
 })
 
@@ -1175,6 +1179,24 @@ vim.g.vimtex_quickfix_open_on_warning = 0
 vim.opt.conceallevel = 2
 vim.opt.concealcursor = 'nv'
 
+vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter' }, {
+  pattern = '*.tex',
+  callback = function()
+    local ok, result = pcall(vim.fn['vimtex#misc#wordcount'])
+    vim.g.vimtex_word_count_status_line_cache = ok and (result .. " words") or ''
+  end,
+})
+
+local function vimtex_wordcount()
+  local mode = vim.fn.mode()
+  if mode == 'v' or mode == 'V' or mode == '\22' then
+    local vwc = vim.fn.wordcount().visual_words
+    return vwc and (vwc .. ' of ' .. vim.g.vimtex_word_count_status_line_cache) or ''
+  end
+  return vim.g.vimtex_word_count_status_line_cache
+end
+
+
 -- Smear Cursor
 
 require('smear_cursor').setup({
@@ -1188,11 +1210,17 @@ require('smear_cursor').setup({
 
 -- Lualine
 
+
 require('lualine').setup({
   sections = {
     lualine_a = { 'mode' },
     lualine_b = { 'branch', 'diff', 'diagnostics' },
-    lualine_c = { 'filename' },
+    lualine_c = { 'filename', {
+      vimtex_wordcount,
+      -- cond = function()
+      --   return vim.bo.filetype == "tex"
+      -- end
+    } },
     lualine_x = { 'encoding', 'filetype', nvimbattery },
     lualine_y = { 'progress', 'location' },
     lualine_z = {
@@ -1434,6 +1462,8 @@ end
 
 -- [[Keymap]]
 
+
+
 local toggle_mouse = function()
   if vim.o.mouse == 'a' then
     vim.o.mouse = ''
@@ -1493,6 +1523,11 @@ end
 
 local open_file_explorer = function()
   local output = vim.fn.system 'explorer .'
+end
+
+if vim.fn.has 'win32' == 0 then
+  vim.keymap.set('n', '<leader>cs', function() vim.cmd("so ~/Documents/Configuration/nvim/init.lua") end,
+    { desc = "[S]ource Dev Neovim Config" })
 end
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
