@@ -77,6 +77,7 @@
         rust-analyzer
         python315
         gcc
+        gnumake
         cmake
         texliveFull
         mupdf
