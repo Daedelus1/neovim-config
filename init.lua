@@ -65,7 +65,7 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       vim.g.test_code_command = 'RustLsp testables'
       vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
       vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
-    elseif ft == 'c' or 'ft' == 'cpp' then
+    elseif ft == 'c' then
       vim.g.run_code_command = 'CMakeQuickRun'
       vim.g.test_code_command = 'CMakeTest'
       vim.g.build_code_command = 'CMakeQuickBuild'
@@ -80,6 +80,13 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
       vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
       vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
+    end
+    if ft == 'c' or ft == 'h' then
+      vim.o.tabstop = 2
+      vim.o.shiftwidth = 2
+    else
+      vim.o.tabstop = 2
+      vim.o.shiftwidth = 2
     end
     if ft ~= 'tex' then
       vim.g.vimtex_word_count_status_line_cache = ''
