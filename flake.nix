@@ -14,6 +14,12 @@
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
   in {
     homeManagerModules.default = {pkgs, ...}: {
+      programs.neovide = {
+        enable = true;
+        settings = {
+          title_hidden = true;
+        };
+      };
       programs.neovim = {
         enable = true;
         plugins = with pkgs.vimPlugins; [
