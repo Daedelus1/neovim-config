@@ -22,46 +22,74 @@
       };
       programs.neovim = {
         enable = true;
-        plugins = with pkgs.vimPlugins; [
-          luasnip
-          alpha-nvim
-          blink-cmp
-          cmake-tools-nvim
-          conform-nvim
-          everforest
-          fidget-nvim
-          gitsigns-nvim
-          lazydev-nvim
-          lualine-nvim
-          mini-icons
-          mini-pairs
-          mini-ai
-          mini-nvim
-          neo-tree-nvim
-          noice-nvim
-          nui-nvim
-          nvim-autopairs
-          nvim-dap
-          nvim-dap-lldb
-          nvim-dap-go
-          nvim-dap-ui
-          nvim-lint
-          nvim-lspconfig
-          nvim-nio
-          nvim-notify
-          nvim-treesitter
-          nvim-web-devicons
-          plenary-nvim
-          render-markdown-nvim
-          rustaceanvim
-          smear-cursor-nvim
-          telescope-ui-select-nvim
-          telescope-nvim
-          todo-comments-nvim
-          vimtex
-          which-key-nvim
-          ltex_extra-nvim
-        ];
+        plugins = with pkgs.vimPlugins;
+          [
+            luasnip
+            alpha-nvim
+            blink-cmp
+            {
+              plugin = pkgs.vimPlugins.cmake-tools-nvim;
+              optional = true;
+            }
+            conform-nvim
+            everforest
+            fidget-nvim
+            gitsigns-nvim
+            lazydev-nvim
+            lualine-nvim
+            mini-icons
+            mini-pairs
+            mini-ai
+            mini-nvim
+            neo-tree-nvim
+            noice-nvim
+            nui-nvim
+            nvim-autopairs
+            nvim-dap
+            nvim-dap-lldb
+            nvim-dap-go
+            nvim-dap-ui
+            nvim-lint
+            nvim-lspconfig
+            nvim-nio
+            nvim-notify
+            nvim-treesitter
+            telescope-fzf-native-nvim
+            nvim-web-devicons
+            plenary-nvim
+            render-markdown-nvim
+            rustaceanvim
+            smear-cursor-nvim
+            telescope-ui-select-nvim
+            telescope-nvim
+            todo-comments-nvim
+            vimtex
+            which-key-nvim
+            ltex_extra-nvim
+          ]
+          ++ (with pkgs.vimPlugins.nvim-treesitter-parsers; [
+            bash
+            c
+            cpp
+            make
+            cmake
+            diff
+            gitignore
+            go
+            html
+            ini
+            lua
+            luadoc
+            r
+            regex
+            rust
+            markdown
+            markdown_inline
+            nix
+            query
+            vim
+            vimdoc
+          ]);
         extraPackages = with pkgs; [
           nil
           clang-tools
@@ -88,6 +116,8 @@
         texliveFull
         mupdf
         xdotool
+        fd
+        pstree
       ];
       programs.zathura.enable = true;
       xdg.configFile."nvim".source = ./.;
