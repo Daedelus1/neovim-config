@@ -32,6 +32,7 @@
               optional = true;
             }
             conform-nvim
+            cmake-tools-nvim
             everforest
             fidget-nvim
             gitsigns-nvim
