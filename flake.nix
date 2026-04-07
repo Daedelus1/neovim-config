@@ -27,10 +27,6 @@
             luasnip
             alpha-nvim
             blink-cmp
-            {
-              plugin = pkgs.vimPlugins.cmake-tools-nvim;
-              optional = true;
-            }
             conform-nvim
             cmake-tools-nvim
             everforest
