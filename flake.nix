@@ -37,17 +37,13 @@
             mini-icons
             mini-pairs
             mini-ai
-            mini-nvim
+            mini-surround
             neo-tree-nvim
             noice-nvim
             nui-nvim
-            nvim-autopairs
             nvim-dap
-            nvim-dap-lldb
-            nvim-dap-go
             nvim-dap-ui
             nvim-lint
-            nvim-lspconfig
             nvim-nio
             nvim-notify
             nvim-treesitter
