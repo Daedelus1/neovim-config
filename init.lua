@@ -59,7 +59,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.api.nvim_create_autocmd({ 'BufEnter' }, {
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
-    --require('fidget').notify('Filetype is ' .. ft)
     if ft == 'rust' then
       vim.g.run_code_command = 'RustLsp runnables'
       vim.g.test_code_command = 'RustLsp testables'
@@ -72,9 +71,18 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       vim.g.clean_code_command = 'CMakeClean'
     elseif ft == 'tex' then
       vim.diagnostic.config({
-        update_in_insert = false, -- don't update while typing
+        update_in_insert = false,
         virtual_text = true,
       })
+    elseif ft == 'r' or ft == 'rmd' or ft == 'quarto' then
+      -- <leader>cr  → send entire file to the R console
+      -- <leader>ct  → run lintr on file
+      -- <leader>cb  → start / focus the R console
+      -- <leader>cc  → clear the R console
+      vim.g.run_code_command   = "lua require('r.run').send_file()"
+      vim.g.test_code_command  = "lua require('r.run').send_file()"
+      vim.g.build_code_command = 'RStart'
+      vim.g.clean_code_command = 'RClearConsole'
     else
       vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
       vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
@@ -187,7 +195,6 @@ end
 
 
 -- gitsigns.nvim
--- Eager Load
 require('gitsigns').setup({
   signs = {
     add = { text = '+' },
@@ -204,18 +211,10 @@ require('gitsigns').setup({
 
 
 -- which-key
--- Eager Load
-
-
 require('which-key').setup({
-  -- delay between pressing a key and opening which-key (milliseconds)
-  -- this setting is independent of vim.o.timeoutlen
   delay = 0,
   icons = {
-    -- set icon mappings to true if you have a Nerd Font
     mappings = vim.g.have_nerd_font,
-    -- If you are using a Nerd Font: set icons.keys to an empty table which will use the
-    -- default which-key.nvim defined Nerd Font icons, otherwise define a string table
     keys = vim.g.have_nerd_font and {} or {
       Up = '<Up> ',
       Down = '<Down> ',
@@ -248,7 +247,6 @@ require('which-key').setup({
     },
   },
 
-  -- Document existing key chains
   spec = {
     { '<leader>c', group = '[C]ode' },
     { '<leader>l', group = '[L]aTeX' },
@@ -258,43 +256,12 @@ require('which-key').setup({
     { '<leader>w', group = '[W]indow' },
     { '<leader>n', group = '[N]otification' },
     { '<leader>d', group = '[D]ebug' },
+    { '<leader>R', group = '[R] Language',  mode = { 'n', 'v' } }, -- NEW: R group
   },
 })
 
 -- Telescope
--- Eager Load
-
--- Telescope is a fuzzy finder that comes with a lot of different things that
--- it can fuzzy find! It's more than just a "file finder", it can search
--- many different aspects of Neovim, your workspace, LSP, and more!
---
--- The easiest way to use Telescope, is to start by doing something like:
---  :Telescope help_tags
---
--- After running this command, a window will open up and you're able to
--- type in the prompt window. You'll see a list of `help_tags` options and
--- a corresponding preview of the help.
---
--- Two important keymaps to use while in Telescope are:
---  - Insert mode: <c-/>
---  - Normal mode: ?
---
--- This opens a window that shows you all of the keymaps for the current
--- Telescope picker. This is really useful to discover what Telescope can
--- do as well as how to actually do it!
-
--- [[ Configure Telescope ]]
--- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
-  -- You can put your default mappings / updates / etc. in here
-  --  All the info you're looking for is in `:help telescope.setup()`
-  --
-  -- defaults = {
-  --   mappings = {
-  --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-  --   },
-  -- },
-  -- pickers = {}
   extensions = {
     ['ui-select'] = {
       require('telescope.themes').get_dropdown(),
@@ -302,7 +269,6 @@ require('telescope').setup {
   },
 }
 
--- Enable Telescope extensions if they are installed
 pcall(require('telescope').load_extension, 'fzf')
 pcall(require('telescope').load_extension, 'ui-select')
 
@@ -359,20 +325,33 @@ vim.lsp.config('ltex', {
   }
 })
 
-vim.lsp.enable({ 'lua_ls', 'clangd', 'nil_ls', 'texlab', 'ltex' })
+-- ── R LSP ────────────────────────────────────────────────────────────────────
+-- r.nvim starts the languageserver automatically when it attaches, so we just
+-- register the config here for any buffer r.nvim doesn't manage (e.g. plain
+-- .r files opened before r.nvim initialises).  r.nvim itself calls the same
+-- R binary that nix put on PATH (from rWithPackages), so languageserver is
+-- always available.
+vim.lsp.config('r_language_server', {
+  cmd = { 'R', '--no-echo', '-e', 'languageserver::run()' },
+  filetypes = { 'r', 'rmd', 'quarto' },
+  capabilities = capabilities,
+  settings = {
+    r = {
+      lsp = {
+        -- Rich diagnostics from languageserver; lintr is handled separately
+        -- by nvim-lint so we keep diagnostics=true here to get parse errors.
+        diagnostics = true,
+      },
+    },
+  },
+})
+
+vim.lsp.enable({ 'lua_ls', 'clangd', 'nil_ls', 'texlab', 'ltex', 'r_language_server' })
 
 --  This function gets run when an LSP attaches to a particular buffer.
---    That is to say, every time a new file is opened that is associated with
---    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
---    function will be executed to configure the current buffer
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
   callback = function(event)
-    -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-    -- to define small helper and utility functions so you don't have to repeat yourself.
-    --
-    -- In this case, we create a function that lets us more easily define mappings specific
-    -- for LSP related items. It sets the mode, buffer and description for us each time.
     local map = function(keys, func, desc, mode)
       mode = mode or 'n'
       vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
@@ -415,10 +394,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
     --  the definition of its *type*, not where it was *defined*.
     map('<leader>cT', require('telescope.builtin').lsp_type_definitions, 'Goto [T]ype Definition')
 
-    -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
     ---@param client vim.lsp.Client
     ---@param method vim.lsp.protocol.Method
-    ---@param bufnr? integer some lsp support methods only in specific files
+    ---@param bufnr? integer
     ---@return boolean
     local function client_supports_method(client, method, bufnr)
       if vim.fn.has 'nvim-0.11' == 1 then
@@ -470,7 +448,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- Diagnostic Config
--- See :help vim.diagnostic.Opts
 vim.diagnostic.config {
   severity_sort = true,
   float = { border = 'rounded', source = 'if_many' },
@@ -517,7 +494,6 @@ local capabilities = require('blink.cmp').get_lsp_capabilities()
 
 
 -- conform
-
 require('conform').setup({
   notify_on_error = false,
   format_on_save = function(bufnr)
@@ -538,30 +514,23 @@ require('conform').setup({
   formatters_by_ft = {
     lua = { 'stylua' },
     cpp = { 'clang-format' },
-    c = { 'clang-format' },
-    nix = { 'alejandra' }
-    -- Conform can also run multiple formatters sequentially
-    -- python = { "isort", "black" },
-    --
-    -- You can use 'stop_after_first' to run the first available formatter from the list
-    -- javascript = { "prettierd", "prettier", stop_after_first = true },
+    c   = { 'clang-format' },
+    nix = { 'alejandra' },
+    -- styler is built into conform; it calls Rscript -e 'styler::style_file(...)'
+    -- using whichever R is on PATH — our nix rWithPackages wrapper.
+    r   = { 'styler' },
+    rmd = { 'styler' },
   },
 })
 
 -- LuaSnip
-
--- Somewhere in your Neovim startup, e.g. init.lua
-require('luasnip').config.set_config { -- Setting LuaSnip config
-  -- Enable autotriggered snippets
+require('luasnip').config.set_config {
   enable_autosnippets = true,
   wordTrig = false,
-
-  -- Use Tab (or some other key if you prefer) to trigger visual selection
   store_selection_keys = '<Tab>',
 }
 
 -- Blink.cmp
-
 require('blink.cmp').setup({
   keymap = {
     -- 'default' (recommended) for mappings similar to built-in completions
@@ -677,15 +646,12 @@ require('nvim-treesitter').setup({
 
 require('noice').setup({
   notify = { enabled = true },
-  -- add any options here
   lsp = {
-    -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
     override = {
       ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
       ['vim.lsp.util.stylize_markdown'] = true,
     },
   },
-  -- you can enable a preset for easier configuration
   presets = {
     bottom_search = true,         -- use a classic bottom cmdline for search
     command_palette = true,       -- position the cmdline and popupmenu together
@@ -694,20 +660,19 @@ require('noice').setup({
     lsp_doc_border = true,        -- add a border to hover docs and signature help
   },
 })
-local real_notify = require('notify')
-setmetatable(require('notify'), {
-  __call = function(_, msg, level, opts)
-    level = level or vim.log.levels.INFO
-    if level == vim.log.levels.ERROR then
-      real_notify.notify(msg, level, opts)
-    else
-      require('fidget').notify(msg, level, opts)
-    end
-  end
-})
+-- local real_notify = require('notify')
+-- setmetatable(require('notify'), {
+--   __call = function(_, msg, level, opts)
+--     level = level or vim.log.levels.INFO
+--     if level == vim.log.levels.ERROR then
+--       real_notify.notify(msg, level, opts)
+--     else
+--       require('fidget').notify(msg, level, opts)
+--     end
+--   end
+-- })
+
 -- Alpha
-
-
 require('alpha').setup(require('alpha.themes.startify').config)
 local alpha = require 'alpha'
 local dashboard = require 'alpha.themes.dashboard'
@@ -745,8 +710,6 @@ require('alpha').setup(dashboard.opts)
 
 
 -- VimTeX
-
-
 vim.g.vimtex_view_method = 'zathura_simple'
 vim.g.vimtex_compiler_latexmk = {
   options = {
@@ -788,7 +751,7 @@ vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter' }, {
 vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
   pattern = "*.tex",
   callback = function()
-    vim.b.disable_autoformat = true -- conform.nvim flag
+    vim.b.disable_autoformat = true
     vim.cmd("silent! lockmarks write")
     vim.b.disable_autoformat = false
   end,
@@ -804,29 +767,62 @@ local function vimtex_wordcount()
 end
 
 
--- Smear Cursor
+-- ── r.nvim ────────────────────────────────────────────────────────────────────
+-- r.nvim is the successor to Nvim-R.  It provides:
+--   • An embedded R terminal (split below by default)
+--   • httpgd-powered plot viewer — plots open in your browser via a local
+--     HTTP server; every new plot auto-refreshes in the same tab.
+--   • An object browser (<leader>Ro) showing the current R environment.
+--   • LSP integration (delegates to r_language_server configured above).
+--
+-- Key design choices:
+--   • R_app points at the rWithPackages wrapper built by nix, which is just
+--     "R" on PATH — no absolute path needed.
+--   • We use httpgd for plots so you get interactive SVG in a browser rather
+--     than static PNG files.  On first plot the browser opens automatically.
+--   • localleader is <Space>, so r.nvim's default <LocalLeader>* mappings
+--     all become <Space>*, which overlaps with your leader.  We therefore
+--     disable r.nvim's built-in mappings entirely and define our own under
+--     <leader>R to keep things tidy.
+require('r').setup({
+  -- Use whichever R is first on PATH (our nix-wrapped version).
+  R_app            = 'R',
+  R_cmd            = 'R',
+  R_args           = { '--no-save', '--quiet' },
+
+  -- Open the R console in a horizontal split at the bottom.
+  rconsole_width   = 0, -- 0 = use the full window width
+  rconsole_height  = 15,
+  min_editor_width = 80,
+
+  pdfviewer        = "zathura",
+
+  -- Disable every built-in <LocalLeader> mapping so they don't collide with
+  -- your <Space>-as-leader setup.  We define our own below.
+  disable_cmds     = {
+    'RCreateRmd',
+    'RCreateR',
+  },
+  -- Turn off default key mappings:
+  user_maps_only   = true,
+})
+
+-- Object browser auto-start is off by default; use <leader>Ro to open it.
 
 require('smear_cursor').setup({
-  -- Default Range
-  stiffness = 0.5,           -- 0.6 [0, 1]
-  trailing_stiffness = 0.49, -- 0.3 [0, 1]
-  time_interval = 7,         --ms
-  -- distance_stop_animating = 0.5, -- 0.1 > 0
+  stiffness = 0.5,
+  trailing_stiffness = 0.49,
+  time_interval = 7,
   smear_insert_mode = false,
 })
 
 -- Lualine
-
-
 require('lualine').setup({
   sections = {
     lualine_a = { 'mode' },
     lualine_b = { 'branch', 'diff', 'diagnostics' },
     lualine_c = { 'filename', {
       vimtex_wordcount,
-      -- cond = function()
-      --   return vim.bo.filetype == "tex"
-      -- end
     } },
     lualine_x = { 'encoding', 'filetype', nvimbattery },
     lualine_y = { 'progress', 'location' },
@@ -858,14 +854,9 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 
 -- Colorscheme
-
--- Load the colorscheme here.
--- Like many other themes, this one has different styles, and you could load
--- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
 vim.cmd.colorscheme 'everforest'
 
 -- nvim-dap
-
 local dap = require 'dap'
 local dapui = require 'dapui'
 
@@ -971,10 +962,15 @@ dap.configurations.cpp = lldb_config
 dap.configurations.rust = lldb_config
 -- Linting
 
+-- Linting
 local lint = require 'lint'
 lint.linters_by_ft = {
-  rust = { 'clippy' },
+  rust     = { 'clippy' },
   markdown = { 'markdownlint' },
+  -- lintr runs via Rscript using whichever R is on PATH (our nix wrapper).
+  -- It respects a .lintr file or ~/.lintr for project-level configuration.
+  r        = { 'lintr' },
+  rmd      = { 'lintr' },
 }
 
 -- To allow other plugins to add linters to require('lint').linters_by_ft,
@@ -1015,9 +1011,6 @@ local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
 vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
   group = lint_augroup,
   callback = function()
-    -- Only run the linter in buffers that you can modify in order to
-    -- avoid superfluous noise, notably within the handy LSP pop-ups that
-    -- describe the hovered symbol using Markdown.
     if vim.bo.modifiable then
       lint.try_lint()
     end
@@ -1025,7 +1018,6 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
 })
 
 -- Fidget
-
 require("fidget").setup({
   progress = {
     display = {
@@ -1035,20 +1027,17 @@ require("fidget").setup({
     }
   }
 })
---
--- After fidget is set up, wrap its $/progress handler
+
 local original_handler = vim.lsp.handlers["$/progress"]
 vim.lsp.handlers["$/progress"] = function(err, result, ctx, config)
   local client = vim.lsp.get_client_by_id(ctx.client_id)
   if client and client.name == "ltex" then
-    return -- drop it before fidget ever sees it
+    return
   end
   original_handler(err, result, ctx, config)
 end
 
 -- [[Keymap]]
-
-
 
 local toggle_mouse = function()
   if vim.o.mouse == 'a' then
@@ -1084,11 +1073,11 @@ local toggle_neotree = function()
     end
   end
   require('neo-tree.command').execute {
-    action = 'focus',          -- OPTIONAL, this is the default value
-    source = 'filesystem',     -- OPTIONAL, this is the default value
-    position = 'left',         -- OPTIONAL, this is the default value
-    reveal_file = reveal_file, -- path to file or folder to reveal
-    reveal_force_cwd = true,   -- change cwd without asking if needed
+    action = 'focus',
+    source = 'filesystem',
+    position = 'left',
+    reveal_file = reveal_file,
+    reveal_force_cwd = true,
     toggle = true,
   }
 end
@@ -1224,7 +1213,40 @@ vim.keymap.set({ 'n', 'x', 'o' }, '<leader>st', toggle_neotree, { desc = 'Toggle
 
 vim.keymap.set({ 'n', 'x', 'o' }, '<leader>se', open_file_explorer, { desc = 'Open File Explorer' })
 
--- Telescope
+-- ── R keymaps (<leader>R group) ──────────────────────────────────────────────
+-- These only do something useful inside .r / .R / .Rmd / .qmd buffers, but
+-- they are registered globally so which-key can always show them.
+--
+-- Sending code ────────────────────────────────────────────────────────────────
+vim.keymap.set('n', '<leader>Rf', function() require('r.run').send_file() end,
+  { desc = 'R: Send [F]ile to console' })
+vim.keymap.set('n', '<leader>Rl', function() require('r.run').send_line() end,
+  { desc = 'R: Send [L]ine to console' })
+vim.keymap.set('v', '<leader>Rs', function() require('r.run').send_selection() end,
+  { desc = 'R: Send [S]election to console' })
+vim.keymap.set('n', '<leader>Rp', function() require('r.run').send_paragraph() end,
+  { desc = 'R: Send [P]aragraph to console' })
+vim.keymap.set('n', '<leader>Rm', function() require('r.run').send_motion() end,
+  { desc = 'R: Send [M]otion to console' })
+
+-- Console management ──────────────────────────────────────────────────────────
+vim.keymap.set('n', '<leader>Rs', function() vim.cmd('RStart') end,
+  { desc = 'R: [S]tart / focus console' })
+vim.keymap.set('n', '<leader>Rq', function() vim.cmd('RClose') end,
+  { desc = 'R: [Q]uit console' })
+vim.keymap.set('n', '<leader>Rc', function() vim.cmd('RClearConsole') end,
+  { desc = 'R: [C]lear console' })
+vim.keymap.set('n', '<leader>Ri', function() vim.cmd('RStop') end,
+  { desc = 'R: [I]nterrupt (stop) running code' })
+
+-- Object browser ──────────────────────────────────────────────────────────────
+vim.keymap.set('n', '<leader>Ro', function() vim.cmd('RUpdateObjBrowser') end,
+  { desc = 'R: [O]bject browser (update)' })
+
+-- Help / documentation ────────────────────────────────────────────────────────
+vim.keymap.set('n', '<leader>Rh', function() require('r.doc').ask_R_doc(vim.fn.expand('<cword>'), '', false) end,
+  { desc = 'R: [H]elp for word under cursor' })
+
 
 -- See `:help telescope.builtin`
 local telescope_builtin = require 'telescope.builtin'
@@ -1235,21 +1257,16 @@ vim.keymap.set('n', '<leader>ss', telescope_builtin.builtin, { desc = '[S]earch 
 vim.keymap.set('n', '<leader>sw', telescope_builtin.grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', telescope_builtin.live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', telescope_builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
---vim.keymap.set('n', '<leader>sr', telescope_builtin.resume, { desc = '[S]earch [R]esume' })
 vim.keymap.set('n', '<leader>sr', telescope_builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 vim.keymap.set('n', '<leader>sb', telescope_builtin.buffers, { desc = '[ ] [S]earch existing [b]uffers' })
 
--- Slightly advanced example of overriding default behavior and theme
 vim.keymap.set('n', '<leader>/', function()
-  -- You can pass additional configuration to Telescope to change the theme, layout, etc.
   telescope_builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
     winblend = 10,
     previewer = false,
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
--- It's also possible to pass additional configuration options.
---  See `:help telescope.builtin.live_grep()` for information about particular keys
 vim.keymap.set('n', '<leader>s/', function()
   telescope_builtin.live_grep {
     grep_open_files = true,
@@ -1257,7 +1274,6 @@ vim.keymap.set('n', '<leader>s/', function()
   }
 end, { desc = '[S]earch [/] in Open Files' })
 
--- Shortcut for searching your Neovim configuration files
 vim.keymap.set('n', '<leader>sc', function()
   telescope_builtin.find_files { cwd = vim.fn.stdpath 'config' }
 end, { desc = '[S]earch Neovim [C]onfig' })
@@ -1287,13 +1303,10 @@ local return_first_capture = function(_, snip)
   return return_capture(_, snip, 1)
 end
 
--- Summary: When `LS_SELECT_RAW` is populated with a visual selection, the function
--- returns an insert node whose initial text is set to the visual selection.
--- When `LS_SELECT_RAW` is empty, the function simply returns an empty insert node.
 local get_visual = function(args, parent)
   if #parent.snippet.env.LS_SELECT_RAW > 0 then
     return sn(nil, i(1, parent.snippet.env.LS_SELECT_RAW))
-  else -- If LS_SELECT_RAW is empty, return a blank insert node
+  else
     return sn(nil, i(1))
   end
 end
@@ -1540,4 +1553,3 @@ luasnip.add_snippets('tex', tex_snippets)
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
---
