@@ -781,14 +781,6 @@ vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter' }, {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-  pattern = "*.tex",
-  callback = function()
-    vim.b.disable_autoformat = true
-    vim.cmd("silent! lockmarks write")
-    vim.b.disable_autoformat = false
-  end,
-})
 
 local function vimtex_wordcount()
   local mode = vim.fn.mode()
