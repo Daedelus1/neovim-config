@@ -12,7 +12,7 @@
     nixpkgs,
     nixpkgs-unstable,
     home-manager,
-  }: let
+  } @ inputs: let
     system = "x86_64-linux";
     pkgs-stable = nixpkgs.legacyPackages.${system};
     pkgs = nixpkgs-unstable.legacyPackages.${system};
@@ -26,7 +26,16 @@
       };
     };
   in {
-    homeManagerModules.default = {pkgs, ...}: {
+    homeManagerModules.default = {...}: let
+      pkgs-unstable = import inputs.nixpkgs-unstable {
+        system = pkgs.system;
+        config.allowUnfree = true;
+      };
+      pkgs-stable = import inputs.nixpkgs {
+        system = pkgs.system;
+        config.allowUnfree = true;
+      };
+    in {
       programs.neovide = {
         enable = true;
         settings = {
@@ -35,7 +44,7 @@
       };
       programs.neovim = {
         enable = true;
-        plugins = with pkgs.vimPlugins;
+        plugins = with pkgs-unstable.vimPlugins;
           [
             luasnip
             alpha-nvim
@@ -76,7 +85,7 @@
           ++ (with pkgs-stable.vimPlugins; [
             cmake-tools-nvim
           ])
-          ++ (with pkgs.vimPlugins.nvim-treesitter-parsers; [
+          ++ (with pkgs-unstable.vimPlugins.nvim-treesitter-parsers; [
             bash
             c
             cpp
@@ -101,7 +110,7 @@
             vimdoc
             yaml
           ]);
-        extraPackages = with pkgs; [
+        extraPackages = with pkgs-unstable; [
           nil
           clang-tools
           lua-language-server
@@ -114,7 +123,7 @@
           nodejs_24
         ];
       };
-      home.packages = with pkgs; [
+      home.packages = with pkgs-unstable; [
         cargo
         rustc
         rustfmt
@@ -130,8 +139,8 @@
         pstree
         python315
         pandoc
-        (pkgs-stable.rWrapper.override {
-          packages = with pkgs-stable.rPackages; [
+        (pkgs-unstable.rWrapper.override {
+          packages = with pkgs-unstable.rPackages; [
             lintr
             languageserver
             styler
