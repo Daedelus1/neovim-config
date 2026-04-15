@@ -28,11 +28,11 @@
   in {
     homeManagerModules.default = {...}: let
       pkgs-unstable = import inputs.nixpkgs-unstable {
-        system = pkgs.system;
+        system = pkgs.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
       pkgs-stable = import inputs.nixpkgs {
-        system = pkgs.system;
+        system = pkgs.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
     in {
