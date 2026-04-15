@@ -123,7 +123,7 @@
           nodejs_24
         ];
       };
-      home.packages = with pkgs-unstable; [
+      home.packages = with pkgs-stable; [
         cargo
         rustc
         rustfmt
