@@ -99,7 +99,6 @@
             lua
             luadoc
             r
-            rnoweb
             regex
             rust
             markdown
@@ -157,6 +156,7 @@
             readxl
             insight
             rmarkdown
+            knitr
           ];
         })
       ];
