@@ -59,6 +59,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.api.nvim_create_autocmd({ 'BufEnter' }, {
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
+
+    vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>rs", "<Plug>RStart", { silent = true })
+
     if ft == 'rust' then
       vim.g.run_code_command = 'RustLsp runnables'
       vim.g.test_code_command = 'RustLsp testables'
@@ -96,12 +99,6 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
 })
 
 
--- setup for battery.nvim
-local nvimbattery = {
-  function()
-    return require('battery').get_status_line()
-  end,
-}
 
 local function telescope_pick(opts)
   local co = coroutine.running()
@@ -288,6 +285,28 @@ vim.lsp.config('lua_ls', {
         callSnippet = 'Replace',
       },
     },
+  },
+})
+
+require("lazydev").setup({
+  enabled = function(root_dir)
+    -- Define the "special file" name you want to look for
+    local marker = ".lazydev"
+
+    -- Search for the marker starting from the current buffer's directory
+    local found = vim.fs.find({ marker }, {
+      upward = true,
+      stop = vim.uv.os_homedir(), -- Stop searching once we hit $HOME
+      path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)),
+    })
+
+    -- Only enable lazydev if the marker file was found
+    return #found > 0
+  end,
+
+  -- The rest of your lazydev config
+  library = {
+    { path = "luvit-meta/library", words = { "vim%.uv" } },
   },
 })
 
@@ -494,6 +513,19 @@ local capabilities = require('blink.cmp').get_lsp_capabilities()
 
 
 -- conform
+
+require('conform').formatters.styler = {
+  command = "Rscript",
+  args = {
+    "--vanilla",
+    "-e",
+    "styler::style_file(commandArgs(TRUE)[1])",
+    "$FILENAME",
+  },
+  stdin = false,
+  timeout_ms = 30000,
+}
+
 require('conform').setup({
   notify_on_error = false,
   format_on_save = function(bufnr)
@@ -511,6 +543,7 @@ require('conform').setup({
       }
     end
   end,
+
   formatters_by_ft = {
     lua = { 'stylua' },
     cpp = { 'clang-format' },
@@ -786,8 +819,8 @@ end
 --     <leader>R to keep things tidy.
 require('r').setup({
   -- Use whichever R is first on PATH (our nix-wrapped version).
-  R_app            = 'R',
-  R_cmd            = 'R',
+  R_app            = vim.fn.exepath('R'),
+  R_cmd            = vim.fn.exepath('R'),
   R_args           = { '--no-save', '--quiet' },
 
   -- Open the R console in a horizontal split at the bottom.
@@ -824,7 +857,7 @@ require('lualine').setup({
     lualine_c = { 'filename', {
       vimtex_wordcount,
     } },
-    lualine_x = { 'encoding', 'filetype', nvimbattery },
+    lualine_x = { 'encoding', 'filetype' },
     lualine_y = { 'progress', 'location' },
     lualine_z = {
       function()
@@ -964,6 +997,39 @@ dap.configurations.rust = lldb_config
 
 -- Linting
 local lint = require 'lint'
+
+lint.linters.lintr = {
+  cmd = "Rscript",
+  stdin = true,
+  args = {
+    "-e",
+    [[
+      con <- file("stdin")
+      txt <- readLines(con)
+      close(con)
+
+      result <- lintr::lint(text = txt)
+      print(result)
+    ]],
+  },
+  stream = "stdout",
+  ignore_exitcode = true,
+  parser = function(output)
+    local diagnostics = {}
+
+    for line in output:gmatch("[^\r\n]+") do
+      table.insert(diagnostics, {
+        lnum = 0,
+        col = 0,
+        message = line,
+        severity = vim.diagnostic.severity.WARN,
+      })
+    end
+
+    return diagnostics
+  end,
+}
+
 lint.linters_by_ft = {
   rust     = { 'clippy' },
   markdown = { 'markdownlint' },
@@ -1038,6 +1104,8 @@ vim.lsp.handlers["$/progress"] = function(err, result, ctx, config)
 end
 
 -- [[Keymap]]
+
+
 
 local toggle_mouse = function()
   if vim.o.mouse == 'a' then
@@ -1218,33 +1286,37 @@ vim.keymap.set({ 'n', 'x', 'o' }, '<leader>se', open_file_explorer, { desc = 'Op
 -- they are registered globally so which-key can always show them.
 --
 -- Sending code ────────────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>Rf', function() require('r.run').send_file() end,
+vim.keymap.set('n', '<leader>rf', function()
+    vim.cmd("RSend source(\"" .. vim.api.nvim_buf_get_name(0) .. "\")")
+  end,
   { desc = 'R: Send [F]ile to console' })
-vim.keymap.set('n', '<leader>Rl', function() require('r.run').send_line() end,
+vim.keymap.set('n', '<leader>rk', function()
+    vim.cmd("RSend rmarkdown::render(\"" .. vim.api.nvim_buf_get_name(0) .. "\")")
+  end,
+  { desc = 'R: [K]nit RMarkdown' })
+vim.keymap.set('n', '<leader>rl', function() require('r.run').send_line() end,
   { desc = 'R: Send [L]ine to console' })
-vim.keymap.set('v', '<leader>Rs', function() require('r.run').send_selection() end,
+vim.keymap.set('v', '<leader>rs', function() require('r.run').send_selection() end,
   { desc = 'R: Send [S]election to console' })
-vim.keymap.set('n', '<leader>Rp', function() require('r.run').send_paragraph() end,
+vim.keymap.set('n', '<leader>rp', function() require('r.run').send_paragraph() end,
   { desc = 'R: Send [P]aragraph to console' })
-vim.keymap.set('n', '<leader>Rm', function() require('r.run').send_motion() end,
+vim.keymap.set('n', '<leader>rm', function() require('r.run').send_motion() end,
   { desc = 'R: Send [M]otion to console' })
 
 -- Console management ──────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>Rs', function() vim.cmd('RStart') end,
-  { desc = 'R: [S]tart / focus console' })
-vim.keymap.set('n', '<leader>Rq', function() vim.cmd('RClose') end,
+vim.keymap.set('n', '<leader>rq', function() vim.cmd('RClose') end,
   { desc = 'R: [Q]uit console' })
-vim.keymap.set('n', '<leader>Rc', function() vim.cmd('RClearConsole') end,
+vim.keymap.set('n', '<leader>rc', function() vim.cmd('RClearConsole') end,
   { desc = 'R: [C]lear console' })
-vim.keymap.set('n', '<leader>Ri', function() vim.cmd('RStop') end,
+vim.keymap.set('n', '<leader>ri', function() vim.cmd('RStop') end,
   { desc = 'R: [I]nterrupt (stop) running code' })
 
 -- Object browser ──────────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>Ro', function() vim.cmd('RUpdateObjBrowser') end,
+vim.keymap.set('n', '<leader>ro', function() vim.cmd('RUpdateObjBrowser') end,
   { desc = 'R: [O]bject browser (update)' })
 
 -- Help / documentation ────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>Rh', function() require('r.doc').ask_R_doc(vim.fn.expand('<cword>'), '', false) end,
+vim.keymap.set('n', '<leader>rh', function() require('r.doc').ask_R_doc(vim.fn.expand('<cword>'), '', false) end,
   { desc = 'R: [H]elp for word under cursor' })
 
 
@@ -1294,6 +1366,7 @@ local r = luasnip.restore_node
 local fmt = require('luasnip.extras.fmt').fmt
 local fmta = require('luasnip.extras.fmt').fmta
 local rep = require('luasnip.extras').rep
+local events = require("luasnip.util.events")
 
 local return_capture = function(_, snip, captureIndex)
   return snip.captures[captureIndex]
@@ -1498,16 +1571,16 @@ local tex_snippets = {
     { trig = ';rstep', snippetType = 'autosnippet', desc = 'Adds a step to the recipe' },
     fmta('\\begin{step}\n<>\n\\method\n<>\n\\end{step}\n<>', { i(2), i(1), i(0) })
   ),
-  s({ trig = ',it', snippetType = 'autosnippet', desc = 'Italicize' }, { t '\\textit{', d(1, get_visual), t '}' }),
-  s({ trig = ',bf', snippetType = 'autosnippet', desc = 'Bold' }, { t '\\textbf{', d(1, get_visual), t '}' }),
-  s({ trig = ',ts', snippetType = 'autosnippet', desc = 'TinySize' }, { t '\\tiny{', d(1, get_visual), t '}' }),
-  s({ trig = ',cs', snippetType = 'autosnippet', desc = 'ScriptSize' }, { t '\\scriptsize{', d(1, get_visual), t '}' }),
-  s({ trig = ',fs', snippetType = 'autosnippet', desc = 'FootnoteSize' },
-    { t '\\footnotsize{', d(1, get_visual), t '}' }),
-  s({ trig = ',ss', snippetType = 'autosnippet', desc = 'SmallSize' }, { t '\\small{', d(1, get_visual), t '}' }),
-  s({ trig = ',ns', snippetType = 'autosnippet', desc = 'NormalSize' }, { t '\\normalsize{', d(1, get_visual), t '}' }),
-  s({ trig = ',mm', snippetType = 'autosnippet', desc = 'Inline Math' }, { t '$', d(1, get_visual), t '$' }),
-  s({ trig = ',dm', snippetType = 'autosnippet', desc = 'Display Math' }, { t '\\[', d(1, get_visual), t '\\]' }),
+  s({ trig = ';it', snippetType = 'autosnippet', desc = 'Italicize' },
+    { t '\\textit{', d(1, get_visual), d(2, get_visual), t '}' }),
+  s({ trig = ';bf', snippetType = 'autosnippet', desc = 'Bold' }, { t '\\textbf{', d(1, get_visual), t '}' }),
+  s({ trig = ';ts', snippetType = 'autosnippet', desc = 'TinySize' }, { t '\\tiny{', d(1, get_visual), t '}' }),
+  s({ trig = ';cs', snippetType = 'autosnippet', desc = 'ScriptSize' }, { t '\\scriptsize{', d(1, get_visual), t '}' }),
+  s({ trig = ';fs', snippetType = 'autosnippet', desc = 'FootnoteSize' }, { t '\\footnotsize{', d(1, get_visual), t '}' }),
+  s({ trig = ';ss', snippetType = 'autosnippet', desc = 'SmallSize' }, { t '\\small{', d(1, get_visual), t '}' }),
+  s({ trig = ';ns', snippetType = 'autosnippet', desc = 'NormalSize' }, { t '\\normalsize{', d(1, get_visual), t '}' }),
+  s({ trig = ';mm', snippetType = 'autosnippet', desc = 'Inline Math' }, { t '$', d(1, get_visual), t '$' }),
+  s({ trig = ';dm', snippetType = 'autosnippet', desc = 'Display Math' }, { t '\\[', d(1, get_visual), t '\\]' }),
   s({ trig = ';beq', snippetType = 'autosnippet', desc = 'Equation Environment' },
     { t '\\begin{equation}\n', d(1, get_visual), t '\\end{equation}' }),
   s({ trig = ';bseq', snippetType = 'autosnippet', desc = 'Equation* Environment' },
@@ -1526,9 +1599,10 @@ local tex_snippets = {
 -- \\begin{figure}[${1:htbp}]\n\t\\centering\n\t${0:${TM_SELECTED_TEXT}}\n\t\\caption{${2:<caption>}}\\label{${3:<label>}}\n\\end{figure}
 
 local global_snippets = {
+
   s(
     { trig = ';aut', snippetType = 'autosnippet', desc = 'Toggle Autocomplete' },
-    f(function()
+    { f(function()
       if vim.b.cmp_enabled then
         vim.b.cmp_enabled = false
         require('fidget').notify 'Suggestions Disabled'
@@ -1537,9 +1611,36 @@ local global_snippets = {
         require('fidget').notify 'Suggestions Enabled'
       end
       RefreshCmpState()
-    end)
+    end) }
   ),
 }
+
+local r_snippets = {
+  s({ trig = ";rs", snippetType = "autosnippet", desc = "Send to R and keep text" }, {
+    -- 1. This dynamic node 'pastes' the visual selection back into the buffer immediately
+    d(1, get_visual),
+  }, {
+    callbacks = {
+      [1] = {
+        -- 2. This triggers when you hit your jump key (Tab) to exit the snippet
+        [events.leave] = function(node)
+          local lines = node:get_text()
+          local code = table.concat(lines, "\n")
+
+          print(lines)
+          if code and code ~= "" then
+            -- 3. Fire the command
+            vim.cmd("RSend " .. code)
+
+            -- 4. Notify via Fidget
+            require('fidget').notify("Sent block to R")
+          end
+        end,
+      },
+    },
+  }),
+}
+
 
 luasnip.add_snippets('all', global_snippets)
 luasnip.add_snippets('markdown', greek_letter_snippets)
@@ -1550,6 +1651,8 @@ luasnip.add_snippets('tex', text_fraction_snippets)
 luasnip.add_snippets('tex', greek_letter_snippets)
 luasnip.add_snippets('tex', math_snippets)
 luasnip.add_snippets('tex', tex_snippets)
+luasnip.add_snippets('r', r_snippets)
+luasnip.add_snippets('rnw', r_snippets)
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
