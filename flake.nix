@@ -130,8 +130,8 @@
         pstree
         python315
         pandoc
-        (pkgs.rWrapper.override {
-          packages = with pkgs.rPackages; [
+        (pkgs-stable.rWrapper.override {
+          packages = with pkgs-stable.rPackages; [
             lintr
             languageserver
             styler
