@@ -99,6 +99,7 @@
             lua
             luadoc
             r
+            rnoweb
             regex
             rust
             markdown
