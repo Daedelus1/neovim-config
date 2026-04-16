@@ -16,6 +16,27 @@
     system = "x86_64-linux";
     pkgs-stable = nixpkgs.legacyPackages.${system};
     pkgs = nixpkgs-unstable.legacyPackages.${system};
+    rWithPackages = pkgs.rWrapper.override {
+      packages = with pkgs.rPackages; [
+        lintr
+        languageserver
+        styler
+        httpgd
+        cli
+        jsonlite
+        glue
+        withr
+        rlang
+        crayon
+        prettycode
+        plotrix
+        tikzDevice
+        readxl
+        insight
+        rmarkdown
+        knitr
+      ];
+    };
     r-nvim = pkgs-stable.vimUtils.buildVimPlugin {
       name = "r-nvim";
       src = pkgs.fetchFromGitHub {
@@ -139,28 +160,11 @@
         pstree
         python315
         pandoc
-        (pkgs-unstable.rWrapper.override {
-          packages = with pkgs-unstable.rPackages; [
-            lintr
-            languageserver
-            styler
-            httpgd
-            cli
-            jsonlite
-            glue
-            withr
-            rlang
-            crayon
-            prettycode
-            plotrix
-            tikzDevice
-            readxl
-            insight
-            rmarkdown
-            knitr
-          ];
-        })
+        rWithPackages
       ];
+      home.sessionVariables = {
+        TEXINPUTS = "${rWithPackages}/lib/R/library/utils/Sweave/:";
+      };
       programs.zathura.enable = true;
       xdg.configFile."nvim".source = ./.;
     };

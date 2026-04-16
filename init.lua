@@ -60,8 +60,6 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
 
-    vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>rs", "<Plug>RStart", { silent = true })
-
     if ft == 'rust' then
       vim.g.run_code_command = 'RustLsp runnables'
       vim.g.test_code_command = 'RustLsp testables'
@@ -1229,9 +1227,7 @@ vim.keymap.set('n', '<leader>nh', function()
   vim.cmd 'Noice history'
 end, { desc = 'Show Notification [H]istory' })
 
-vim.keymap.set({ 'i' }, '<Tab>', function()
-  require('luasnip').expand {}
-end, { silent = true })
+vim.keymap.set({ 'i' }, '<Tab>', require('luasnip').expand, { silent = true })
 vim.keymap.set({ 'i', 's' }, '<Tab>', function()
   require('luasnip').jump(1)
 end, { silent = true })
@@ -1239,78 +1235,56 @@ vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
   require('luasnip').jump(-1)
 end, { silent = true })
 
-vim.keymap.set({ 'n' }, '<leader>ds', function()
-  require('dap').continue()
-end, { desc = 'Debug: [S]tart/Continue' })
-vim.keymap.set({ 'n' }, '<leader>di', function()
-  require('dap').step_into()
-end, { desc = 'Debug: Step [I]nto' })
-vim.keymap.set({ 'n' }, '<leader>do', function()
-  require('dap').step_over()
-end, { desc = 'Debug: Step [O]ver' })
-vim.keymap.set({ 'n' }, '<leader>du', function()
-  require('dap').step_out()
-end, { desc = 'Debug: Step O[u]t' })
-vim.keymap.set({ 'n' }, '<leader>db', function()
-  require('dap').toggle_breakpoint()
-end, { desc = 'Debug: Toggle [B]reakpoint' })
-vim.keymap.set({ 'n' }, '<leader>dc', function()
-  require('dap').run_to_cursor()
-end, { desc = 'Debug: Run to [c]ursor' })
-vim.keymap.set({ 'n' }, '<leader>dp', function()
-  require('dap').pause()
-end, { desc = 'Debug: [P]ause' })
-vim.keymap.set({ 'n' }, '<leader>dC', function()
-  require('dap').close()
-end, { desc = 'Debug: [C]lose' })
+vim.keymap.set({ 'n' }, '<leader>ds', require('dap').continue, { desc = 'Debug: [S]tart/Continue' })
+vim.keymap.set({ 'n' }, '<leader>di', require('dap').step_into, { desc = 'Debug: Step [I]nto' })
+vim.keymap.set({ 'n' }, '<leader>do', require('dap').step_over, { desc = 'Debug: Step [O]ver' })
+vim.keymap.set({ 'n' }, '<leader>du', require('dap').step_out, { desc = 'Debug: Step O[u]t' })
+vim.keymap.set({ 'n' }, '<leader>db', require('dap').toggle_breakpoint, { desc = 'Debug: Toggle [B]reakpoint' })
+vim.keymap.set({ 'n' }, '<leader>dc', require('dap').run_to_cursor, { desc = 'Debug: Run to [c]ursor' })
+vim.keymap.set({ 'n' }, '<leader>dp', require('dap').pause, { desc = 'Debug: [P]ause' })
+vim.keymap.set({ 'n' }, '<leader>dC', require('dap').close, { desc = 'Debug: [C]lose' })
 
 
-vim.keymap.set({ 'n' }, '<leader>dd', function()
-  require('dapui').toggle()
-end, { desc = 'Debug: Toggle UI.' })
+vim.keymap.set({ 'n' }, '<leader>dd', require('dapui').toggle, { desc = 'Debug: Toggle UI.' })
 
 vim.keymap.set({ 'n', 'x', 'o' }, '<leader>st', toggle_neotree, { desc = 'Toggle Neo[t]ree' })
 
 vim.keymap.set({ 'n', 'x', 'o' }, '<leader>se', open_file_explorer, { desc = 'Open File Explorer' })
 
 -- ── R keymaps (<leader>R group) ──────────────────────────────────────────────
--- These only do something useful inside .r / .R / .Rmd / .qmd buffers, but
--- they are registered globally so which-key can always show them.
+-- All send operations use <Plug> mappings via nvim_feedkeys because r.nvim
+-- does not expose public Lua functions.
 --
+-- ASSUMPTION: <Plug>RDSendMBlock sends the current <<>>= chunk in .Rnw files.
+-- If r.nvim's actual plug name differs, check :RMapsDesc inside an rnoweb buffer.
+
 -- Sending code ────────────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>rf', function()
-    vim.cmd("RSend source(\"" .. vim.api.nvim_buf_get_name(0) .. "\")")
-  end,
-  { desc = 'R: Send [F]ile to console' })
-vim.keymap.set('n', '<leader>rk', function()
-    vim.cmd("RSend rmarkdown::render(\"" .. vim.api.nvim_buf_get_name(0) .. "\")")
-  end,
-  { desc = 'R: [K]nit RMarkdown' })
-vim.keymap.set('n', '<leader>rl', function() require('r.run').send_line() end,
-  { desc = 'R: Send [L]ine to console' })
-vim.keymap.set('v', '<leader>rs', function() require('r.run').send_selection() end,
-  { desc = 'R: Send [S]election to console' })
-vim.keymap.set('n', '<leader>rp', function() require('r.run').send_paragraph() end,
-  { desc = 'R: Send [P]aragraph to console' })
-vim.keymap.set('n', '<leader>rm', function() require('r.run').send_motion() end,
-  { desc = 'R: Send [M]otion to console' })
+
+vim.keymap.set('n', '<leader>rsf', '<Plug>RSendFile', { desc = 'R: Send [F]ile to console' })
+vim.keymap.set('n', '<leader>rsl', '<Plug>RDSendLine', { desc = 'R: Send [L]ine to console' })
+vim.keymap.set('v', '<leader>rsv', '<Plug>RSendSelection', { desc = 'R: Send [V]isual selection to console' })
+vim.keymap.set('n', '<leader>rsp', '<Plug>RDSendParagraph', { desc = 'R: Send [P]aragraph to console' })
+vim.keymap.set('n', '<leader>rsb', '<Plug>RDSendMBlock', { desc = 'R: Send chunk mark [B]lock (Rnoweb)' })
 
 -- Console management ──────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>rq', function() vim.cmd('RClose') end,
-  { desc = 'R: [Q]uit console' })
-vim.keymap.set('n', '<leader>rc', function() vim.cmd('RClearConsole') end,
-  { desc = 'R: [C]lear console' })
-vim.keymap.set('n', '<leader>ri', function() vim.cmd('RStop') end,
-  { desc = 'R: [I]nterrupt (stop) running code' })
+-- r.nvim has no RStart command; sending an empty string is the canonical
+-- way to start the console (r.nvim auto-starts R on first RSend).
+vim.keymap.set("n", "<leader>rcs", "<Plug>RStart", { desc = "R: [S]tart console" })
+vim.keymap.set("n", "<leader>rck", "<Plug>RClose", { desc = "R: [K]ill console" })
+vim.keymap.set("n", "<leader>rcc", "<Plug>RSaveClose", { desc = "R: Save and [C]lose console" })
 
 -- Object browser ──────────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>ro', function() vim.cmd('RUpdateObjBrowser') end,
-  { desc = 'R: [O]bject browser (update)' })
+vim.keymap.set('n', '<leader>ro', '<Plug>ROBToggle', { desc = 'R: Toggle [O]bject browser' })
+
+-- Make ────────────────────────────────────────────────────────────────────────
+vim.keymap.set('n', '<leader>rmsw', '<Plug>RSweave', { desc = 'R: [Sw]eave to PDF' })
+vim.keymap.set('n', '<leader>rmk', '<Plug>RSweave', { desc = 'R: [K]nit' })
+vim.keymap.set('n', '<leader>rmsb', '<Plug>RBibTeX', { desc = 'R: [S]eave to PDF with [B]ibTeX' })
+
 
 -- Help / documentation ────────────────────────────────────────────────────────
-vim.keymap.set('n', '<leader>rh', function() require('r.doc').ask_R_doc(vim.fn.expand('<cword>'), '', false) end,
+vim.keymap.set('n', '<leader>rh', '<Plug>RHelp',
   { desc = 'R: [H]elp for word under cursor' })
-
 
 -- See `:help telescope.builtin`
 local telescope_builtin = require 'telescope.builtin'
