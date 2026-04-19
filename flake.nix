@@ -1,4 +1,12 @@
 {
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
@@ -6,16 +14,27 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+    neovim-src = {
+      url = "github:neovim/neovim/v0.12.0";
+      flake = false;
+    };
   };
   outputs = {
     self,
     nixpkgs,
     nixpkgs-unstable,
     home-manager,
+    neovim-src,
   } @ inputs: let
     system = "x86_64-linux";
     pkgs-stable = nixpkgs.legacyPackages.${system};
     pkgs = nixpkgs-unstable.legacyPackages.${system};
+    neovim-stable = pkgs.neovim-unwrapped.overrideAttrs (old: {
+      version = "0.12.0";
+      src = inputs.neovim-src;
+      # Clear the old cmake build cache to avoid stale flags
+      cmakeFlags = old.cmakeFlags or [];
+    });
     rWithPackages = pkgs.rWrapper.override {
       packages = with pkgs.rPackages; [
         lintr
@@ -65,6 +84,7 @@
       };
       programs.neovim = {
         enable = true;
+        package = neovim-stable;
         plugins = with pkgs-unstable.vimPlugins;
           [
             luasnip
@@ -162,9 +182,6 @@
         pandoc
         rWithPackages
       ];
-      home.sessionVariables = {
-        TEXINPUTS = "${rWithPackages}/lib/R/library/utils/Sweave/:";
-      };
       programs.zathura.enable = true;
       xdg.configFile."nvim".source = ./.;
     };
@@ -191,6 +208,7 @@
         rust-analyzer
       ];
       shellHook = ''
+
         export NVIM_NIX=1
         echo "Reloading Home Manager..."
         home-manager switch --flake .#ethans
