@@ -85,6 +85,8 @@
       programs.neovim = {
         enable = true;
         package = neovim-stable;
+        withRuby = false;
+        withPython3 = false;
         plugins = with pkgs-unstable.vimPlugins;
           [
             luasnip
@@ -162,6 +164,7 @@
           alejandra
           ripgrep
           nodejs_24
+          wl-clipboard
         ];
       };
       home.packages = with pkgs-stable; [

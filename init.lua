@@ -18,7 +18,15 @@ vim.o.relativenumber = true -- Relative Line Numbers
 vim.o.number = true
 vim.o.mouse = ''            -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.showmode = false      -- Don't show the mode, since it's already in the status line
-vim.schedule(function()     -- Sync clipboard between OS and Neovim.
+vim.schedule(function()
+  if vim.fn.executable('wl-copy') == 1 then
+    vim.g.clipboard = {
+      name          = 'wl-clipboard',
+      copy          = { ['+'] = 'wl-copy', ['*'] = 'wl-copy --primary' },
+      paste         = { ['+'] = 'wl-paste', ['*'] = 'wl-paste --primary' },
+      cache_enabled = 0,
+    }
+  end
   vim.o.clipboard = 'unnamedplus'
 end)
 vim.o.breakindent = true   -- Enable break indent
