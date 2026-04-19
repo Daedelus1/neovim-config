@@ -18,17 +18,19 @@ vim.o.relativenumber = true -- Relative Line Numbers
 vim.o.number = true
 vim.o.mouse = ''            -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.showmode = false      -- Don't show the mode, since it's already in the status line
-vim.schedule(function()
-  if vim.fn.executable('wl-copy') == 1 then
-    vim.g.clipboard = {
-      name          = 'wl-clipboard',
-      copy          = { ['+'] = 'wl-copy', ['*'] = 'wl-copy --primary' },
-      paste         = { ['+'] = 'wl-paste', ['*'] = 'wl-paste --primary' },
-      cache_enabled = 0,
-    }
-  end
-  vim.o.clipboard = 'unnamedplus'
-end)
+vim.g.clipboard = {
+  name          = 'xclip',
+  copy          = {
+    ['+'] = { 'xclip', '-selection', 'clipboard' },
+    ['*'] = { 'xclip', '-selection', 'primary' },
+  },
+  paste         = {
+    ['+'] = { 'xclip', '-selection', 'clipboard', '-o' },
+    ['*'] = { 'xclip', '-selection', 'primary', '-o' },
+  },
+  cache_enabled = 0,
+}
+vim.o.clipboard = 'unnamedplus'
 vim.o.breakindent = true   -- Enable break indent
 vim.o.undofile = true      -- Save undo history
 vim.o.ignorecase = true    -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
@@ -67,6 +69,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.api.nvim_create_autocmd({ 'BufEnter' }, {
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
+
 
     if ft == 'rust' then
       vim.g.run_code_command = 'RustLsp runnables'

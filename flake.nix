@@ -164,7 +164,6 @@
           alejandra
           ripgrep
           nodejs_24
-          wl-clipboard
         ];
       };
       home.packages = with pkgs-stable; [
@@ -183,6 +182,8 @@
         pstree
         python315
         pandoc
+        xclip
+
         rWithPackages
       ];
       programs.zathura.enable = true;
