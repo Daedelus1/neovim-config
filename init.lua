@@ -258,11 +258,13 @@ require('which-key').setup({
     { '<leader>l', group = '[L]aTeX' },
     { '<leader>s', group = '[S]earch' },
     { '<leader>t', group = '[T]oggle' },
-    { '<leader>h', group = 'Git [H]unk',    mode = { 'n', 'v' } },
+    { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' }
+    },
     { '<leader>w', group = '[W]indow' },
     { '<leader>n', group = '[N]otification' },
     { '<leader>d', group = '[D]ebug' },
-    { '<leader>R', group = '[R] Language',  mode = { 'n', 'v' } }, -- NEW: R group
+    { '<leader>R', group = '[R] Language', mode = { 'n', 'v' }
+    },
   },
 })
 
@@ -554,14 +556,13 @@ require('conform').setup({
   end,
 
   formatters_by_ft = {
-    lua = { 'stylua' },
-    cpp = { 'clang-format' },
-    c   = { 'clang-format' },
-    nix = { 'alejandra' },
-    -- styler is built into conform; it calls Rscript -e 'styler::style_file(...)'
-    -- using whichever R is on PATH — our nix rWithPackages wrapper.
-    r   = { 'styler' },
-    rmd = { 'styler' },
+    lua    = { 'stylua' },
+    cpp    = { 'clang-format' },
+    c      = { 'clang-format' },
+    nix    = { 'alejandra' },
+    r      = { 'styler' },
+    rmd    = { 'styler' },
+    python = { 'ruff_format' },
   },
 })
 
@@ -1034,8 +1035,6 @@ lint.linters.lintr = {
 lint.linters_by_ft = {
   rust     = { 'clippy' },
   markdown = { 'markdownlint' },
-  -- lintr runs via Rscript using whichever R is on PATH (our nix wrapper).
-  -- It respects a .lintr file or ~/.lintr for project-level configuration.
   r        = { 'lintr' },
   rmd      = { 'lintr' },
 }

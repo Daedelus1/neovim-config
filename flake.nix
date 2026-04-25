@@ -107,6 +107,7 @@
             nui-nvim
             nvim-dap
             nvim-dap-ui
+            nvim-dap-python
             nvim-lint
             nvim-nio
             nvim-notify
@@ -141,6 +142,8 @@
             ini
             lua
             luadoc
+            python
+            toml
             r
             rnoweb
             regex
