@@ -9,6 +9,7 @@ vim.g.codelldb_path = vim.fn.system(
   "echo /nix/store/$(ls /nix/store/ | grep -P \"vscode-extension-vadimcn-vscode-lldb-[0-9\\.]*(/|\\z)\")/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb")
 vim.g.vim_window_id = vim.fn.system("xdotool getactivewindow")
 vim.g.vimtex_word_count_status_line_cache = ''
+vim.g._closeable_terminal_next = false
 
 -- [[Options]]
 vim.g.mapleader = ' '       -- Set <space> as the leader key
@@ -66,6 +67,24 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+vim.api.nvim_create_autocmd('TermOpen', {
+  desc = 'Enables a keymap to close run terminals only with <Esc>',
+  callback = function(args)
+    if vim.g._closeable_terminal_next then
+      vim.g._closeable_terminal_next = false
+      local bufnr = args.buf
+      vim.keymap.set('n', '<Esc>', function()
+        vim.api.nvim_buf_delete(bufnr, { force = true })
+      end, { buffer = bufnr, desc = 'Close run terminal' })
+    end
+  end,
+})
+
+function Run_in_terminal(cmd)
+  vim.g._closeable_terminal_next = true
+  vim.cmd('split | terminal ' .. cmd)
+end
+
 vim.api.nvim_create_autocmd({ 'BufEnter' }, {
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
@@ -81,20 +100,16 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       vim.g.test_code_command = 'CMakeTest'
       vim.g.build_code_command = 'CMakeQuickBuild'
       vim.g.clean_code_command = 'CMakeClean'
-    elseif ft == 'tex' then
-      vim.diagnostic.config({
-        update_in_insert = false,
-        virtual_text = true,
-      })
     elseif ft == 'r' or ft == 'rmd' or ft == 'quarto' then
-      -- <leader>cr  → send entire file to the R console
-      -- <leader>ct  → run lintr on file
-      -- <leader>cb  → start / focus the R console
-      -- <leader>cc  → clear the R console
       vim.g.run_code_command   = "lua require('r.run').send_file()"
       vim.g.test_code_command  = "lua require('r.run').send_file()"
       vim.g.build_code_command = 'RStart'
       vim.g.clean_code_command = 'RClearConsole'
+    elseif ft == 'python' then
+      vim.g.run_code_command   = "lua Run_in_terminal('python3 " .. vim.fn.expand('%:p') .. "')"
+      vim.g.test_code_command  = "lua Run_in_terminal('python3 -m pytest')"
+      vim.g.build_code_command = "lua require('fidget').notify 'No build step for Python'"
+      vim.g.clean_code_command = "lua require('fidget').notify 'No clean step for Python'"
     else
       vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
       vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
@@ -342,7 +357,15 @@ vim.lsp.config('texlab', {
 vim.lsp.config('ltex', {
   cmd = { "ltex-ls" },
   filetypes = { "tex" },
-  capabilities = capabilities,
+  capabilities = vim.tbl_deep_extend("force", capabilities, {
+    textDocument = {
+      synchronization = {
+        didSave = true,
+        willSave = true,
+        willSaveWaitUntil = true,
+      }
+    }
+  }),
   on_attach = function(client, bufnr)
     require("ltex_extra").setup({
       path = vim.fn.expand("~") .. "/.local/state/nvim/ltex"
@@ -350,17 +373,13 @@ vim.lsp.config('ltex', {
   end,
   settings = {
     ltex = {
-      checkFrequency = "save"
+      checkFrequency = "edit",
+      language = "en-US",
+      enabled = { "tex", "latex", "markdown" },
     }
   }
 })
 
--- ── R LSP ────────────────────────────────────────────────────────────────────
--- r.nvim starts the languageserver automatically when it attaches, so we just
--- register the config here for any buffer r.nvim doesn't manage (e.g. plain
--- .r files opened before r.nvim initialises).  r.nvim itself calls the same
--- R binary that nix put on PATH (from rWithPackages), so languageserver is
--- always available.
 vim.lsp.config('r_language_server', {
   cmd = { 'R', '--no-echo', '-e', 'languageserver::run()' },
   filetypes = { 'r', 'rmd', 'quarto' },
@@ -368,15 +387,28 @@ vim.lsp.config('r_language_server', {
   settings = {
     r = {
       lsp = {
-        -- Rich diagnostics from languageserver; lintr is handled separately
-        -- by nvim-lint so we keep diagnostics=true here to get parse errors.
         diagnostics = true,
       },
     },
   },
 })
 
-vim.lsp.enable({ 'lua_ls', 'clangd', 'nil_ls', 'texlab', 'ltex', 'r_language_server' })
+vim.lsp.config('based_pyright', {
+  cmd = { "basedpyright-langserver", "--stdio" },
+  filetypes = { "python" },
+  capabilities = capabilities,
+  settings = {
+    basedpyright = {
+      analysis = {
+        typeCheckingMode = "standard", -- "off" | "basic" | "standard" | "strict"
+        autoImportCompletions = true,
+        useLibraryCodeForTypes = true,
+      },
+    },
+  },
+})
+
+vim.lsp.enable({ 'lua_ls', 'clangd', 'nil_ls', 'texlab', 'ltex', 'r_language_server', 'based_pyright' })
 
 --  This function gets run when an LSP attaches to a particular buffer.
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -494,13 +526,10 @@ vim.diagnostic.config {
     source = 'if_many',
     spacing = 2,
     format = function(diagnostic)
-      local diagnostic_message = {
-        [vim.diagnostic.severity.ERROR] = diagnostic.message,
-        [vim.diagnostic.severity.WARN] = diagnostic.message,
-        [vim.diagnostic.severity.INFO] = diagnostic.message,
-        [vim.diagnostic.severity.HINT] = diagnostic.message,
-      }
-      return diagnostic_message[diagnostic.severity]
+      return diagnostic.message
+    end,
+    filter = function(diagnostic) -- merged here
+      return not string.match(diagnostic.message, 'code is inactive due to')
     end,
   },
 }
@@ -535,6 +564,9 @@ require('conform').formatters.styler = {
   },
   stdin = false,
   timeout_ms = 30000,
+}
+
+require('conform').formatters.ruff_format = {
 }
 
 require('conform').setup({
@@ -937,6 +969,8 @@ dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
 local dap = require("dap")
 
+require('dap-python').setup(vim.fn.exepath('python3'))
+
 -- Find the lldb-dap binary (NixOS puts it in the store)
 local lldb_dap = vim.fn.exepath("lldb-dap")
 
@@ -1037,6 +1071,7 @@ lint.linters_by_ft = {
   markdown = { 'markdownlint' },
   r        = { 'lintr' },
   rmd      = { 'lintr' },
+  python   = { 'ruff' }
 }
 
 -- To allow other plugins to add linters to require('lint').linters_by_ft,
@@ -1088,7 +1123,8 @@ require("fidget").setup({
   progress = {
     display = {
       overrides = {
-        ltex = { ignore = true }
+        ltex = { ignore = true },
+        based_pyright = { ignore = true },
       }
     }
   }
@@ -1097,7 +1133,7 @@ require("fidget").setup({
 local original_handler = vim.lsp.handlers["$/progress"]
 vim.lsp.handlers["$/progress"] = function(err, result, ctx, config)
   local client = vim.lsp.get_client_by_id(ctx.client_id)
-  if client and client.name == "ltex" then
+  if client and (client.name == "ltex" or client.name == "based_pyright") then
     return
   end
   original_handler(err, result, ctx, config)
@@ -1220,13 +1256,6 @@ vim.keymap.set('n', '<leader>cb', vim.g.build_code, { desc = '[B]uild Code' })
 vim.keymap.set('n', '<leader>cc', vim.g.clean_code, { desc = '[C]lean Code' })
 vim.keymap.set('n', '<leader>ct', vim.g.test_code, { desc = '[T]est Code' })
 
-vim.diagnostic.config {
-  virtual_text = {
-    filter = function(diagnostic)
-      return not string.match(diagnostic.message, 'code is inactive due to')
-    end,
-  },
-}
 vim.keymap.set('n', '<leader>sn', function()
   vim.cmd 'Noice telescope'
 end, { desc = '[S]earch [N]otifications' })
@@ -1253,6 +1282,7 @@ vim.keymap.set({ 'n' }, '<leader>db', require('dap').toggle_breakpoint, { desc =
 vim.keymap.set({ 'n' }, '<leader>dc', require('dap').run_to_cursor, { desc = 'Debug: Run to [c]ursor' })
 vim.keymap.set({ 'n' }, '<leader>dp', require('dap').pause, { desc = 'Debug: [P]ause' })
 vim.keymap.set({ 'n' }, '<leader>dC', require('dap').close, { desc = 'Debug: [C]lose' })
+vim.keymap.set({ 'n' }, '<leader>dk', require('dap').disconnect, { desc = 'Debug: [K]ill' })
 
 
 vim.keymap.set({ 'n' }, '<leader>dd', require('dapui').toggle, { desc = 'Debug: Toggle UI.' })

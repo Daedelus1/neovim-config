@@ -183,10 +183,14 @@
         xdotool
         fd
         pstree
-        python315
+        (pkgs-unstable.python313.withPackages (ps: [
+          ps.debugpy
+          ps.pytest
+        ]))
         pandoc
         xclip
-
+        pkgs-unstable.ruff
+        pkgs-unstable.basedpyright
         rWithPackages
       ];
       programs.zathura.enable = true;
@@ -213,6 +217,10 @@
         nil
         clang-tools
         rust-analyzer
+        (pkgs.python313.withPackages (ps: [
+          ps.debugpy
+          ps.pytest
+        ]))
       ];
       shellHook = ''
 
