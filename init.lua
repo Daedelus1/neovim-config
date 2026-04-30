@@ -748,6 +748,25 @@ require('noice').setup({
 -- })
 
 -- Alpha
+local function get_footer()
+  local handle = io.popen('git -C ' ..
+    vim.fn.stdpath('config') .. ' log -1 --format="%cd|%h" --date=format:"%Y-%m-%d %H:%M" 2>/dev/null')
+  if not handle then
+    return 'Development Build'
+  end
+  local result = handle:read('*a')
+  handle:close()
+  result = vim.trim(result)
+  if result == '' then
+    return 'Development Build'
+  end
+  local date, hash = result:match('([^|]+)|(.+)')
+  if not date then
+    return 'Development Build'
+  end
+  return date .. 'rev.' .. hash
+end
+
 require('alpha').setup(require('alpha.themes.startify').config)
 local alpha = require 'alpha'
 local dashboard = require 'alpha.themes.dashboard'
@@ -776,11 +795,16 @@ dashboard.section.buttons.val = {
   dashboard.button('n', '  New file', ':ene <BAR> startinsert <CR>'),
   dashboard.button('f', '󰈞  Find file', ':Telescope find_files <CR>'),
   dashboard.button('t', '  Find text', ':Telescope live_grep <CR>'),
-  dashboard.button('m', '󰃀  Bookmarks', ':Telescope marks <CR>'),
   dashboard.button('r', '󱑂  Recently used files', ':Telescope oldfiles <CR>'),
   dashboard.button('c', '  Configuration', ':e ~/AppData/Local/nvim/init.lua<CR>'),
   dashboard.button('q', '󰩈  Quit Neovim', ':qa<CR>'),
 }
+dashboard.section.footer.val = get_footer()
+dashboard.section.footer.opts = {
+  position = 'center',
+  hl = 'Comment',
+}
+
 require('alpha').setup(dashboard.opts)
 
 
