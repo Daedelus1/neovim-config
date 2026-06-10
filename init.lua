@@ -5,9 +5,6 @@ vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set
 vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
 vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
 vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
-vim.g.codelldb_path = vim.fn.system(
-  "echo /nix/store/$(ls /nix/store/ | grep -P \"vscode-extension-vadimcn-vscode-lldb-[0-9\\.]*(/|\\z)\")/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb")
-vim.g.vim_window_id = vim.fn.system("xdotool getactivewindow")
 vim.g.vimtex_word_count_status_line_cache = ''
 vim.g._closeable_terminal_next = false
 
@@ -273,12 +270,11 @@ require('which-key').setup({
     { '<leader>l', group = '[L]aTeX' },
     { '<leader>s', group = '[S]earch' },
     { '<leader>t', group = '[T]oggle' },
-    { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' }
-    },
+    { '<leader>h', group = 'Git [H]unk',    mode = { 'n', 'v' } },
     { '<leader>w', group = '[W]indow' },
     { '<leader>n', group = '[N]otification' },
     { '<leader>d', group = '[D]ebug' },
-    { '<leader>R', group = '[R] Language', mode = { 'n', 'v' }
+    { '<leader>r', group = '[R] Language', mode = { 'n', 'v' }
     },
   },
 })
@@ -315,7 +311,7 @@ vim.lsp.config('lua_ls', {
 })
 
 require("lazydev").setup({
-  enabled = function(root_dir)
+  enabled = function(_)
     -- Define the "special file" name you want to look for
     local marker = ".lazydev"
 
@@ -366,7 +362,7 @@ vim.lsp.config('ltex', {
       }
     }
   }),
-  on_attach = function(client, bufnr)
+  on_attach = function(_, _)
     require("ltex_extra").setup({
       path = vim.fn.expand("~") .. "/.local/state/nvim/ltex"
     })
@@ -595,6 +591,7 @@ require('conform').setup({
     r      = { 'styler' },
     rmd    = { 'styler' },
     python = { 'ruff_format' },
+    json   = { "fixjson" },
   },
 })
 

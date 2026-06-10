@@ -183,6 +183,7 @@
         xdotool
         fd
         pstree
+        fixjson
         (pkgs-unstable.python313.withPackages (ps: [
           ps.debugpy
           ps.pytest
