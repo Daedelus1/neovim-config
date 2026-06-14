@@ -165,7 +165,7 @@
           ltex-ls
           lua-language-server
           nil
-          nodejs_22
+          nodejs_24
           prettierd
           ripgrep
           tailwindcss_4
