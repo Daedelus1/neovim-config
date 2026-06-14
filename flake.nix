@@ -9,7 +9,7 @@
   };
   inputs = {
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -37,23 +37,23 @@
     });
     rWithPackages = pkgs.rWrapper.override {
       packages = with pkgs.rPackages; [
-        lintr
-        languageserver
-        styler
-        httpgd
         cli
-        jsonlite
-        glue
-        withr
-        rlang
         crayon
-        prettycode
-        plotrix
-        tikzDevice
-        readxl
+        glue
+        httpgd
         insight
-        rmarkdown
+        jsonlite
         knitr
+        languageserver
+        lintr
+        plotrix
+        prettycode
+        readxl
+        rlang
+        rmarkdown
+        styler
+        tikzDevice
+        withr
       ];
     };
     r-nvim = pkgs-stable.vimUtils.buildVimPlugin {
@@ -89,7 +89,6 @@
         withPython3 = false;
         plugins = with pkgs-unstable.vimPlugins;
           [
-            luasnip
             alpha-nvim
             blink-cmp
             conform-nvim
@@ -97,33 +96,34 @@
             fidget-nvim
             gitsigns-nvim
             lazydev-nvim
+            ltex_extra-nvim
             lualine-nvim
+            luasnip
+            mini-ai
             mini-icons
             mini-pairs
-            mini-ai
             mini-surround
             neo-tree-nvim
             noice-nvim
             nui-nvim
             nvim-dap
-            nvim-dap-ui
             nvim-dap-python
+            nvim-dap-ui
             nvim-lint
             nvim-nio
             nvim-notify
             nvim-treesitter
-            telescope-fzf-native-nvim
             nvim-web-devicons
             plenary-nvim
             render-markdown-nvim
             rustaceanvim
             smear-cursor-nvim
-            telescope-ui-select-nvim
+            telescope-fzf-native-nvim
             telescope-nvim
+            telescope-ui-select-nvim
             todo-comments-nvim
             vimtex
             which-key-nvim
-            ltex_extra-nvim
             r-nvim
           ]
           ++ (with pkgs-stable.vimPlugins; [
@@ -132,9 +132,8 @@
           ++ (with pkgs-unstable.vimPlugins.nvim-treesitter-parsers; [
             bash
             c
-            cpp
-            make
             cmake
+            cpp
             diff
             gitignore
             go
@@ -142,54 +141,61 @@
             ini
             lua
             luadoc
-            python
-            toml
-            r
-            rnoweb
-            regex
-            rust
+            make
             markdown
             markdown_inline
             nix
+            python
             query
+            r
+            regex
+            rnoweb
+            rust
+            toml
             vim
             vimdoc
             yaml
           ]);
         extraPackages = with pkgs-unstable; [
-          nil
+          alejandra
           clang-tools
-          lua-language-server
-          texlab
-          ltex-ls
+          eslint_d
           glibc
           lldb
-          alejandra
-          ripgrep
+          ltex-ls
+          lua-language-server
+          nil
           nodejs_24
+          prettierd
+          ripgrep
+          tailwindcss_4
+          texlab
+          typescript-language-server
+          vscode-langservers-extracted
         ];
       };
       home.packages = with pkgs-stable; [
         cargo
-        rustc
-        rustfmt
         clippy
-        rust-analyzer
+        cmake
+        fd
+        fixjson
         gcc
         gnumake
-        cmake
-        texliveFull
         mupdf
-        xdotool
-        fd
+        pandoc
         pstree
-        fixjson
+        rust-analyzer
+        rustc
+        rustfmt
+        texliveFull
+        typescript
+        xclip
+        xdotool
         (pkgs-unstable.python313.withPackages (ps: [
           ps.debugpy
           ps.pytest
         ]))
-        pandoc
-        xclip
         pkgs-unstable.ruff
         pkgs-unstable.basedpyright
         rWithPackages
