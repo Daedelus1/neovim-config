@@ -171,7 +171,7 @@
           tailwindcss_4
           texlab
           typescript-language-server
-          vscode-langservers-extracted
+          biome
           superhtml
         ];
       };

@@ -432,32 +432,10 @@ vim.lsp.config('ts_ls', {
       },
     },
   },
-})
-
-vim.lsp.config('eslint', {
-  cmd = { 'vscode-eslint-language-server', '--stdio' },
-  filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
-  root_markers = { '.eslintrc', '.eslintrc.js', '.eslintrc.cjs', '.eslintrc.json', 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.cjs', 'package.json' },
-  settings = {
-    workingDirectories = { mode = 'auto' },
-  },
-})
-
-vim.lsp.config('tailwindcss', {
-  cmd = { 'tailwindcss-language-server', '--stdio' },
-  filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'html', 'css' },
-  root_markers = { 'tailwind.config.js', 'tailwind.config.ts', 'tailwind.config.cjs', 'tailwind.config.mjs', 'postcss.config.js', 'package.json' },
-})
-
-vim.lsp.config('jsonls', {
-  cmd = { 'vscode-json-language-server', '--stdio' },
-  filetypes = { 'json', 'jsonc' },
-  init_options = { provideFormatter = false }, -- let conform/prettierd handle formatting
-})
-
-vim.lsp.config('cssls', {
-  cmd = { 'vscode-css-language-server', '--stdio' },
-  filetypes = { 'css', 'scss', 'less' },
+  on_attach = function(client)
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end,
 })
 
 vim.lsp.config('superhtml', {
@@ -466,14 +444,18 @@ vim.lsp.config('superhtml', {
   root_markers = { '.git' },
 })
 
+vim.lsp.config('biome', {
+  cmd = { 'biome', 'lsp-proxy' },
+  filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'json', 'jsonc', 'css' },
+  root_markers = { 'biome.json', 'biome.jsonc', 'package.json', '.git' },
+})
+
 vim.lsp.enable({
-  "cssls",
-  "eslint",
-  "jsonls",
   "tailwindcss",
   'based_pyright',
   'clangd',
   'superhtml',
+  'biome',
   'ltex',
   'lua_ls',
   'nil_ls',
@@ -662,12 +644,12 @@ require('conform').setup({
   formatters_by_ft = {
     c               = { 'clang-format' },
     cpp             = { 'clang-format' },
-    css             = { 'prettierd' },
+    css             = { 'biome' },
     html            = { 'prettierd' },
-    javascript      = { 'prettierd' },
-    javascriptreact = { 'prettierd' },
-    json            = { "fixjson", "prettierd" },
-    jsonc           = { 'prettierd' },
+    javascript      = { 'biome' },
+    javascriptreact = { 'biome' },
+    json            = { 'biome' },
+    jsonc           = { 'biome' },
     lua             = { 'stylua' },
     markdown        = { 'prettierd' },
     nix             = { 'alejandra' },
@@ -675,8 +657,8 @@ require('conform').setup({
     r               = { 'styler' },
     rmd             = { 'styler' },
     scss            = { 'prettierd' },
-    typescript      = { 'prettierd' },
-    typescriptreact = { 'prettierd' },
+    typescript      = { 'biome' },
+    typescriptreact = { 'biome' },
   },
 })
 
