@@ -172,6 +172,7 @@
           texlab
           typescript-language-server
           vscode-langservers-extracted
+          superhtml
         ];
       };
       home.packages = with pkgs-stable; [

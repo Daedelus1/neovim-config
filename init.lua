@@ -460,17 +460,10 @@ vim.lsp.config('cssls', {
   filetypes = { 'css', 'scss', 'less' },
 })
 
-vim.lsp.config('html', {
-  cmd = { 'vscode-html-language-server', '--stdio' },
+vim.lsp.config('superhtml', {
+  cmd = { 'superhtml', 'lsp' },
   filetypes = { 'html' },
-  init_options = {
-    provideFormatter = false, -- let conform/prettierd handle formatting
-  },
-  settings = {
-    html = {
-      format = { enable = false },
-    },
-  },
+  root_markers = { '.git' },
 })
 
 vim.lsp.enable({
@@ -480,7 +473,7 @@ vim.lsp.enable({
   "tailwindcss",
   'based_pyright',
   'clangd',
-  'html',
+  'superhtml',
   'ltex',
   'lua_ls',
   'nil_ls',
