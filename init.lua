@@ -404,7 +404,90 @@ vim.lsp.config('based_pyright', {
   },
 })
 
-vim.lsp.enable({ 'lua_ls', 'clangd', 'nil_ls', 'texlab', 'ltex', 'r_language_server', 'based_pyright' })
+vim.lsp.config('ts_ls', {
+  cmd = { 'typescript-language-server', '--stdio' },
+  filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
+  root_markers = { 'tsconfig.json', 'jsconfig.json', 'package.json', '.git' },
+  settings = {
+    typescript = {
+      inlayHints = {
+        includeInlayParameterNameHints = 'all',
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      },
+    },
+    javascript = {
+      inlayHints = {
+        includeInlayParameterNameHints = 'all',
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      },
+    },
+  },
+})
+
+vim.lsp.config('eslint', {
+  cmd = { 'vscode-eslint-language-server', '--stdio' },
+  filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
+  root_markers = { '.eslintrc', '.eslintrc.js', '.eslintrc.cjs', '.eslintrc.json', 'eslint.config.js', 'eslint.config.mjs', 'eslint.config.cjs', 'package.json' },
+  settings = {
+    workingDirectories = { mode = 'auto' },
+  },
+})
+
+vim.lsp.config('tailwindcss', {
+  cmd = { 'tailwindcss-language-server', '--stdio' },
+  filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'html', 'css' },
+  root_markers = { 'tailwind.config.js', 'tailwind.config.ts', 'tailwind.config.cjs', 'tailwind.config.mjs', 'postcss.config.js', 'package.json' },
+})
+
+vim.lsp.config('jsonls', {
+  cmd = { 'vscode-json-language-server', '--stdio' },
+  filetypes = { 'json', 'jsonc' },
+  init_options = { provideFormatter = false }, -- let conform/prettierd handle formatting
+})
+
+vim.lsp.config('cssls', {
+  cmd = { 'vscode-css-language-server', '--stdio' },
+  filetypes = { 'css', 'scss', 'less' },
+})
+
+vim.lsp.config('html', {
+  cmd = { 'vscode-html-language-server', '--stdio' },
+  filetypes = { 'html' },
+  init_options = {
+    provideFormatter = false, -- let conform/prettierd handle formatting
+  },
+  settings = {
+    html = {
+      format = { enable = false },
+    },
+  },
+})
+
+vim.lsp.enable({
+  "cssls",
+  "eslint",
+  "jsonls",
+  "tailwindcss",
+  'based_pyright',
+  'clangd',
+  'html',
+  'ltex',
+  'lua_ls',
+  'nil_ls',
+  'r_language_server',
+  'texlab',
+  'ts_ls',
+})
 
 --  This function gets run when an LSP attaches to a particular buffer.
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -584,14 +667,23 @@ require('conform').setup({
   end,
 
   formatters_by_ft = {
-    lua    = { 'stylua' },
-    cpp    = { 'clang-format' },
-    c      = { 'clang-format' },
-    nix    = { 'alejandra' },
-    r      = { 'styler' },
-    rmd    = { 'styler' },
-    python = { 'ruff_format' },
-    json   = { "fixjson" },
+    c               = { 'clang-format' },
+    cpp             = { 'clang-format' },
+    css             = { 'prettierd' },
+    html            = { 'prettierd' },
+    javascript      = { 'prettierd' },
+    javascriptreact = { 'prettierd' },
+    json            = { "fixjson", "prettierd" },
+    jsonc           = { 'prettierd' },
+    lua             = { 'stylua' },
+    markdown        = { 'prettierd' },
+    nix             = { 'alejandra' },
+    python          = { 'ruff_format' },
+    r               = { 'styler' },
+    rmd             = { 'styler' },
+    scss            = { 'prettierd' },
+    typescript      = { 'prettierd' },
+    typescriptreact = { 'prettierd' },
   },
 })
 
