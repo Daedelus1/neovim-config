@@ -645,7 +645,11 @@ require('conform').setup({
     c               = { 'clang-format' },
     cpp             = { 'clang-format' },
     css             = { 'biome' },
+<<<<<<< Updated upstream
     html            = { 'prettierd' },
+=======
+    html            = { 'superhtml' },
+>>>>>>> Stashed changes
     javascript      = { 'biome' },
     javascriptreact = { 'biome' },
     json            = { 'biome' },
