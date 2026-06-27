@@ -49,6 +49,7 @@ vim.o.scrolloff = 10       -- Minimal number of screen lines to keep above and b
 vim.o.confirm = true
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
+vim.opt.runtimepath:append("/home/ethans/.local/share/nvim/site/pack/hm/start/nvim-treesitter/runtime")
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -765,21 +766,6 @@ require('mini.pairs').setup()
 --  Check out: https://github.com/echasnovski/mini.nvim
 -- require('mini.misc').setup_termbg_sync()
 
--- Treesitter
-
-require('nvim-treesitter').setup({
-  ignore_install = { 'latex' },
-  -- Autoinstall languages that are not installed
-  auto_install = true,
-  highlight = {
-    enable = true,
-    -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-    --  If you are experiencing weird indenting issues, add the language to
-    --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-    additional_vim_regex_highlighting = { 'ruby', 'c' },
-  },
-  indent = { enable = true, disable = { 'ruby' } },
-})
 
 -- Noice
 

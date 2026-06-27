@@ -139,6 +139,7 @@
             go
             html
             ini
+            latex
             lua
             luadoc
             make
