@@ -333,6 +333,12 @@ require("lazydev").setup({
   },
 })
 
+vim.lsp.config('gopls', {
+  cmd = { "gopls" },
+  filetypes = { "go" },
+  capabilities = capabilities,
+})
+
 vim.lsp.config('clangd', {
   cmd = { "clangd" },
   filetypes = { "c", "cpp" },
@@ -463,6 +469,7 @@ vim.lsp.enable({
   'r_language_server',
   'texlab',
   'ts_ls',
+  'gopls',
 })
 
 --  This function gets run when an LSP attaches to a particular buffer.
@@ -646,6 +653,7 @@ require('conform').setup({
     c               = { 'clang-format' },
     cpp             = { 'clang-format' },
     css             = { 'biome' },
+    go              = { "goimports", "gofumpt" },
     html            = { 'superhtml' },
     javascript      = { 'biome' },
     javascriptreact = { 'biome' },
@@ -976,7 +984,9 @@ vim.cmd.colorscheme 'everforest'
 -- nvim-dap
 local dap = require 'dap'
 local dapui = require 'dapui'
+local dapgo = require 'dap-go'
 
+dapgo.setup()
 
 
 -- Dap UI setup
@@ -1117,11 +1127,12 @@ lint.linters.lintr = {
 }
 
 lint.linters_by_ft = {
-  rust     = { 'clippy' },
+  go       = { "golangcilint" },
   markdown = { 'markdownlint' },
+  python   = { 'ruff' },
   r        = { 'lintr' },
   rmd      = { 'lintr' },
-  python   = { 'ruff' }
+  rust     = { 'clippy' },
 }
 
 -- To allow other plugins to add linters to require('lint').linters_by_ft,
@@ -1178,6 +1189,10 @@ require("fidget").setup({
       }
     }
   }
+})
+
+require("render-markdown").setup({
+  file_types = { "markdown", "terminal" }
 })
 
 local original_handler = vim.lsp.handlers["$/progress"]

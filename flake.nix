@@ -106,6 +106,7 @@
             neo-tree-nvim
             noice-nvim
             nui-nvim
+            nvim-dap-go
             nvim-dap
             nvim-dap-python
             nvim-dap-ui
@@ -194,6 +195,14 @@
         typescript
         xclip
         xdotool
+
+        go
+        gopls
+        go-tools # Linter
+        gotools # Toolchain
+        golangci-lint
+        gofumpt
+        delve
         (pkgs-unstable.python313.withPackages (ps: [
           ps.debugpy
           ps.pytest
