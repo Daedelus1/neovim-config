@@ -108,6 +108,11 @@ vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       vim.g.test_code_command  = "lua Run_in_terminal('python3 -m pytest')"
       vim.g.build_code_command = "lua require('fidget').notify 'No build step for Python'"
       vim.g.clean_code_command = "lua require('fidget').notify 'No clean step for Python'"
+    elseif ft == 'go' then
+      vim.g.run_code_command   = "lua Run_in_terminal(\"go run " .. vim.fn.expand('%:t') .. "\")"
+      vim.g.test_code_command  = "lua require('fidget').notify 'No test configuration set!'"
+      vim.g.build_code_command = "lua require('fidget').notify 'No build configuration set!'"
+      vim.g.clean_code_command = "lua require('fidget').notify 'No clean configuration set!'"
     else
       vim.g.run_code_command = "lua require('fidget').notify 'No run configuration set!'"
       vim.g.test_code_command = "lua require('fidget').notify 'No test configuration set!'"
