@@ -1672,6 +1672,15 @@ local tex_snippets = {
   ),
   s({ trig = ',ci', snippetType = 'autosnippet' }, fmta('\\autocite[<>]{<>}<>', { i(2), i(1), i(0) })),
 }
+
+local go_snippets = {
+  s(
+    { trig = ";err", snippetType = 'autosnippet', desc = "If err != nil snippet" },
+    fmta('<>, err := <>\nif err != nil {\n\t<>\n}<>',
+      { i(1), i(2), i(3), i(0) })
+  )
+}
+
 -- \\begin{figure}[${1:htbp}]\n\t\\centering\n\t${0:${TM_SELECTED_TEXT}}\n\t\\caption{${2:<caption>}}\\label{${3:<label>}}\n\\end{figure}
 
 local global_snippets = {
@@ -1729,6 +1738,7 @@ luasnip.add_snippets('tex', math_snippets)
 luasnip.add_snippets('tex', tex_snippets)
 luasnip.add_snippets('r', r_snippets)
 luasnip.add_snippets('rnw', r_snippets)
+luasnip.add_snippets('go', go_snippets)
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
